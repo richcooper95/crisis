@@ -1,0 +1,65 @@
+.arena {
+  background: #fff;
+  padding: 25px;
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+  line-height: 1.5em;
+  margin-top: 72px;
+}
+
+.app-title-image {
+  height: 90px;
+  position: absolute;
+  right: 0;
+}
+
+.app-title {
+  background-color: rgba(236, 34, 41, 0.934);
+  height: 80px;
+  line-height: 65px;
+  color: rgb(255, 255, 255);
+  position: absolute;
+  left: 0px;
+  right: 169px;
+  padding-left: 24px;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+}
+
+.app {
+  display: flex;
+}
+
+.sidebar-container {
+  min-height: 100vh;
+  background-color: rgba(236, 34, 41, 0.934);
+  color: rgb(255, 255, 255);
+  margin-top: 80px;
+}
+
+.sidebar {
+  width: 200px;
+  padding-top: 25px;
+}
+
+.sidebar-link {
+  line-height: 20px;
+  height: 20px;
+  padding-bottom: 15px;
+  padding-left: 20px;
+  padding-top: 5px;
+}
+
+.sidebar-link:hover {
+  border-right: 5px solid rgb(172, 17, 17);
+  background-color: rgba(245, 86, 91, 0.8);
+}
+
+h1 {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
