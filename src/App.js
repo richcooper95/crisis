@@ -29,11 +29,22 @@ export default class App extends React.Component {
         />
         <div className="app-title">
           <h1>
-            Coach Assignment App
+            Crisis Coach Assignment Tool
           </h1>
         </div>
         <div className="app-title-image" >
-          <img src="logo-crisis.png" alt="Crisis title logo" height="80" style={{float: "right"}}/>
+          <a
+            target="_blank"
+            rel="noopener noreferrer"
+            href="https://crisis.org.uk"
+          >
+            <img
+              src="logo-crisis.png"
+              alt="Crisis title logo"
+              height="80"
+              style={{float: "right"}}
+            />
+          </a>
         </div>
         <Arena sidebarSelect={this.state.sidebarSelect}/>
       </div>

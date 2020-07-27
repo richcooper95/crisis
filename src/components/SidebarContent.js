@@ -28,7 +28,7 @@ const linkTransitionStyles = {
 
 const sidebarButtonNames = {
     "home": "Home",
-    "assign": "Assign Coach",
+    "assign": "Assign Member",
     "add": "Add Coach",
     "remove": "Remove Coach",
     "search": "Search",

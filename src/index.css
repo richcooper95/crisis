@@ -42,7 +42,7 @@ body {
 
 .sidebar {
   width: 200px;
-  padding-top: 25px;
+  padding-top: 20px;
 }
 
 .sidebar-link {
@@ -51,15 +51,175 @@ body {
   padding-bottom: 15px;
   padding-left: 20px;
   padding-top: 5px;
+  cursor: pointer;
 }
 
 .sidebar-link:hover {
   border-right: 5px solid rgb(172, 17, 17);
   background-color: rgba(245, 86, 91, 0.8);
+  cursor: pointer;
 }
 
 h1 {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.optionContainer li:hover,
+.optionContainer .highlight {
+  background: red;
+  color: #fff;
+}
+
+.assign-keys {
+  margin-left: 400px;
+  margin-top: -600px;
+  padding-left: 15px;
+}
+
+body.react-confirm-alert-body-element {
+  overflow: hidden;
+}
+
+.react-confirm-alert-blur {
+  filter: url(#gaussian-blur);
+  filter: blur(2px);
+  -webkit-filter: blur(2px);
+}
+
+.react-confirm-alert-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 99;
+  background: rgba(255, 255, 255, 0.9);
+  display: -webkit-flex;
+  display: -moz-flex;
+  display: -ms-flex;
+  display: -o-flex;
+  display: flex;
+  justify-content: center;
+  -ms-align-items: center;
+  align-items: center;
+  opacity: 0;
+  -webkit-animation: react-confirm-alert-fadeIn 0.5s 0.2s forwards;
+  -moz-animation: react-confirm-alert-fadeIn 0.5s 0.2s forwards;
+  -o-animation: react-confirm-alert-fadeIn 0.5s 0.2s forwards;
+  animation: react-confirm-alert-fadeIn 0.5s 0.2s forwards;
+}
+
+.react-confirm-alert-body {
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+  width: 400px;
+  padding: 30px;
+  text-align: left;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 20px 75px rgba(0, 0, 0, 0.13);
+  color: black;
+  white-space: pre-wrap;
+}
+
+.react-confirm-alert-svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.react-confirm-alert-body > h1 {
+  margin-top: 0;
+  color: rgba(236, 34, 41, 0.934);
+}
+
+.react-confirm-alert-body > h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.react-confirm-alert-button-group {
+  display: -webkit-flex;
+  display: -moz-flex;
+  display: -ms-flex;
+  display: -o-flex;
+  display: flex;
+  justify-content: flex-start;
+  margin-top: 20px;
+}
+
+.react-confirm-alert-button-group > button {
+  outline: none;
+  background: rgba(236, 34, 41, 0.934);
+  border: none;
+  display: inline-block;
+  padding: 6px 18px;
+  color: #fff;
+  margin-right: 10px;
+  border-radius: 5px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+@-webkit-keyframes react-confirm-alert-fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@-moz-keyframes react-confirm-alert-fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@-o-keyframes react-confirm-alert-fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes react-confirm-alert-fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.assign-form-left {
+  width: 450px;
+  height: 460px;
+}
+
+.assign-form-right {
+  margin-left: 450px;
+  margin-top: -508px;
+  padding-left: 50px;
+  width: 450px;
+  height: 500px;
+}
+
+.assign-form-submit > button {
+  outline: none;
+  background: rgba(236, 34, 41, 0.934);
+  border: none;
+  display: inline-block;
+  padding: 6px 18px;
+  color: #fff;
+  margin-right: 10px;
+  border-radius: 5px;
+  font-size: 12px;
+  cursor: pointer;
 }
