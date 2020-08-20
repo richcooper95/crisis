@@ -5,8 +5,11 @@ This page contains documentation aimed at users of the tool. It may also be usef
 ## Contents
 
 [Overview](#overview)
+
 [Coach Database](#coach-database)
+
 [Actions](#actions)
+
 [Future Work](#future-work)
 
 ___
