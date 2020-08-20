@@ -57,12 +57,12 @@ async def api_coaches(
 ) -> sanic.response.HTTPResponse:
     """HTTP API for 'coaches'."""
     if request.method == "GET":
-        if coach_id:
-            coach = await get_coach(coach_id)
-            response = sanic.response.json(coach.to_json())
-        else:
+        if coach_id is None:
             coaches = await get_coaches()
             response = sanic.response.json([c.to_json() for c in coaches])
+        else:
+            coach = await get_coach(coach_id)
+            response = sanic.response.json(coach.to_json())
     elif request.method == "POST":
         coach_id = await create_coach(request.json)
         response = sanic.response.json({"coach-id": coach_id})
@@ -85,7 +85,10 @@ async def api_coach_matches(
     print("Got request:")
     for key in ["age", "gender", "languages", "need", "rights", "housing"]:
         print(key, request.args.get(key))
-    return sanic.response.json([])
+    return sanic.response.json(
+        [Coach("special name").to_json()],
+        headers={"Access-Control-Allow-Origin": "http://localhost:3000",},
+    )
 
 
 # ------------------------------------------------------------------------------

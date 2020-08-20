@@ -62,8 +62,9 @@ export default class Assign extends React.Component {
           {
             label: 'Confirm',
             onClick: () => {
-              // TODO: Generate URL.
-              fetch('http://localhost:8000/api/v1/coach-matches?age=24&gender=male&languages=english,spanish&need=1&rights=2&housing=3')
+              // TODO: Generate URL with params.
+              // TODO: Hardcode to localhost:8000 for development mode.
+              fetch('/api/v1/coach-matches?age=24&gender=male&languages=english,spanish&need=1&rights=2&housing=3')
                 .then(response => response.json())
                 .then(data => console.log(data))
               console.log("Confirmed form: " + JSON.stringify(this.state));
@@ -75,11 +76,14 @@ export default class Assign extends React.Component {
         ]
       })
     } else {
-      // @@@LG
-      fetch('http://localhost:8000/api/v1/coach-matches?age=24&gender=male&languages=english,spanish&need=1&rights=2&housing=3')
-        .then(response => response.json())
-        .then(data => console.log(data))
-      console.log("Confirmed form: " + JSON.stringify(this.state));
+      // @@@LG Just here for testing :)
+      fetch(
+        'http://localhost:8000/api/v1/coach-matches?age=24&gender=male&languages=english,spanish&need=1&rights=2&housing=3',
+        {
+          mode: 'cors'
+        }
+      ).then(response => response.json())
+       .then(data => console.log(data))
 
       confirmAlert({
         title: 'Incomplete Form',
