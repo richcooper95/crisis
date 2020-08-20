@@ -61,9 +61,13 @@ export default class Assign extends React.Component {
         buttons: [
           {
             label: 'Confirm',
-            onClick: () => console.log(
-              "Confirmed form: " + JSON.stringify(this.state)
-            )
+            onClick: () => {
+              // TODO: Generate URL.
+              fetch('http://localhost:8000/api/v1/coach-matches?age=24&gender=male&languages=english,spanish&need=1&rights=2&housing=3')
+                .then(response => response.json())
+                .then(data => console.log(data))
+              console.log("Confirmed form: " + JSON.stringify(this.state));
+            }
           },
           {
             label: 'Go back',
@@ -71,6 +75,12 @@ export default class Assign extends React.Component {
         ]
       })
     } else {
+      // @@@LG
+      fetch('http://localhost:8000/api/v1/coach-matches?age=24&gender=male&languages=english,spanish&need=1&rights=2&housing=3')
+        .then(response => response.json())
+        .then(data => console.log(data))
+      console.log("Confirmed form: " + JSON.stringify(this.state));
+
       confirmAlert({
         title: 'Incomplete Form',
         message: ('The data form is incomplete.\n\nPlease fill in the remaining fields.'),
