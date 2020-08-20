@@ -6,4 +6,4 @@ This contains both external documentation (for users) and implementation notes (
 
 [Users](/docs/USERS.md)
 
-[Developers](/docs/SECURITY.md)
+[Developers](/docs/DEVELOPERS.md)
