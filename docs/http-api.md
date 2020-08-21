@@ -14,6 +14,17 @@ The 'coaches' object supports POST, GET and DELETE.
 
 `/api/v1/coaches`
 
+The JSON fields used to represent a coach are as follows:
+ - name: string
+ - bio: string
+ - available: boolean
+ - birth_year: integer
+ - gender: string ('male', 'female' or 'other')
+ - languages: object {\<language\>:string: \<proficiency\>:integer}
+ - need: list \[integer\]
+ - rights: list \[integer\]
+ - housing: list \[integer\]
+
 
 ### Create new coach (POST)
 
@@ -21,13 +32,13 @@ The 'coaches' object supports POST, GET and DELETE.
 
 #### Request body
 
-JSON object with the following fields (all required):
- - name: string
- - TODO
+JSON object with fields from the coach representation (all *required*).
 
 #### Response
 
-TODO
+JSON object with the following fields:
+ - \<all fields from the coach representation\>
+ - id: integer
 
 
 ### Edit coach (POST)
@@ -36,35 +47,35 @@ TODO
 
 #### Request body
 
-JSON object with the following fields (all optional):
- - name: string
- - TODO
+JSON object with any fields from the coach representation (all *optional*).
 
 #### Response
 
-TODO
+JSON object with the following fields:
+ - \<all fields from the coach representation\>
+ - id: integer
 
 
 ### Fetch all coaches (GET)
-
-TBD
 
 `GET /api/v1/coaches/`
 
 #### Response
 
-TODO
+List of JSON objects with the following fields:
+ - \<all fields from the coach representation\>
+ - id: integer
 
 
 ### Look up coach by ID (GET)
-
-TBD
 
 `GET /api/v1/coaches/<id>`
 
 #### Response
 
-TODO
+JSON object with the following fields:
+ - \<all fields from the coach representation\>
+ - id: integer
 
 
 ### Delete coach (DELETE)
@@ -73,7 +84,7 @@ TODO
 
 #### Response
 
-TODO
+Empty.
 
 
 
@@ -87,9 +98,9 @@ The 'coach-matches' object supports GET only. This corresponds to looking up coa
 
 `GET /api/v1/coach-matches?<params>`
 
-Parameters are as follows (all optional):
- - age: integer
- - gender: 'male', 'female' or 'other'
+Parameters are as follows (all *optional*):
+ - birth_year: integer
+ - gender: string ('male', 'female' or 'other')
  - languages: string (a comma separated list of "\<language\>:\<proficiency\>")
  - need: integer
  - rights: integer
@@ -97,7 +108,7 @@ Parameters are as follows (all optional):
 
 #### Response
 
-JSON response, a list containing up to 10 of the best matches. Each element in the list has the following fields:
- - coach-id: integer
- - TODO \<the rest of the coach data\>
- - Match score: integer between 0 and 100
+A list of JSON objects in order of match score. Each element in the list has the following fields:
+ - \<all fields from the coach representation\>
+ - id: integer
+ - match_score: integer
