@@ -6,6 +6,10 @@ This page contains documentation aimed at developers contributing to the project
 
 [Security](#security)
 
+[Hosting](#hosting)
+
+
+
 ## Security
 
 ### General
@@ -29,5 +33,21 @@ This page contains documentation aimed at developers contributing to the project
 
 ### HTTP/HTTPS
 
+
+## Hosting
+
+### AWS
+
+
+
+## Database
+
+
+
+## Front End
+
+The front end is written in React.js.
+
+## Server
 
 
