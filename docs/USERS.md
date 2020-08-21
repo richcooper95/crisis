@@ -38,6 +38,8 @@ The data stored about each of the Coaches is as follows:
 1. **Date of Birth**
     1. This is used to calculate the Coach's age bracket to compare with that of the Member.
     1. _@@@ If the exact date is too much personal info then just the year is sufficient as an approximation._
+1. **Gender**
+    1. This is included since some issues associated with homelessness only affect certain genders.
 1. **Languages**
     1. A list of languages spoken by the Coach, in order of proficiency.
 1. **Level of Need**
@@ -145,4 +147,3 @@ ___
 
 1. Ensure the app is secure with HTTPS and authentication.
 1. Add the ability to record which Members are currently assigned to which Coach (or at least a count of how many Members are assigned to each Coach).
-1. 
