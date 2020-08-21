@@ -4,7 +4,7 @@ import logging
 import os
 import sys
 from collections import namedtuple
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import sanic
 import sanic.request
@@ -230,8 +230,29 @@ def delete_coach(coach_id: int) -> None:
     coach_db.remove(coach_id)
 
 
-def get_coach_matches(data: CoachJSON) -> List[Coach]:
-    return []
+def get_coach_matches(data: CoachJSON) -> List[Tuple[int, Coach]]:
+    def get_best_lang_match(
+        coach: Coach, languages: Dict[str, int]
+    ) -> Optional[Tuple[str, int]]:
+        try:
+            return min(
+                (L for L in languages if L in coach.languages), key=lambda L: L[1]
+            )
+        except ValueError:
+            return None
+
+    coach_matches = []
+    for coach in get_coaches():
+        match_score = 0
+        best_lang_match = get_best_lang_match(coach, data.get("languages", []))
+        if best_lang_match:
+            match_score += (5 - best_lang_match[1]) * 10
+        if data.get("gender") == coach.gender:
+            match_score += 5
+        if "birth_year" in data:
+            match_score += max(0, 10 - abs(data["birth_year"] - coach.birth_year))
+        coach_matches.append((match_score, coach))
+    return sorted(coach_matches, reverse=True)
 
 
 # ------------------------------------------------------------------------------
@@ -288,8 +309,15 @@ async def api_coach_matches(
 ) -> sanic.response.HTTPResponse:
     """HTTP API for 'coach-matches'."""
     try:
-        coaches = get_coach_matches(request.args)
-        response = sanic.response.json([c.to_json() for c in coaches])
+        args = {k: v[0] for k, v in request.args.items()}
+        args["birth_year"] = int(args["birth_year"])
+        coach_matches = get_coach_matches(args)
+        response = sanic.response.json(
+            [
+                {**coach.to_json(), "match_score": score}
+                for score, coach in coach_matches
+            ]
+        )
     except Exception:
         logger.exception(
             "Unexpected exception on %s route", request.path, exc_info=True

@@ -54,7 +54,7 @@ echo
 
 echo "Remove coach"
 echo "------------"
-curl --request DELETE localhost:8000/api/v1/coaches/0
+curl --request DELETE localhost:8000/api/v1/coaches/3
 echo
 echo
 
@@ -62,6 +62,13 @@ echo
 echo "List DB"
 echo "-------"
 curl localhost:8000/api/v1/coaches
+echo
+echo
+
+
+echo "Coach matches for birth_year=34, languages=english:2, gender=male"
+echo "-----------------------------------------------------------------"
+curl "localhost:8000/api/v1/coach-matches?birth_year=1990&languages=english:2&gender=male"
 echo
 echo
 
