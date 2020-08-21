@@ -1,5 +1,4 @@
 import argparse
-import functools
 import json
 import logging
 import os
@@ -21,15 +20,56 @@ app.static("/", "build/")
 # JSON type for coach data.
 CoachJSON = Dict[str, Union[str, int, bool, float, "CoachJSON"]]
 
+# ------------------------------------------------------------------------------
+# Database
+# ------------------------------------------------------------------------------
 
-class Coach(namedtuple("_Coach", ["id", "name", "birth_year", "gender"])):
+
+class Coach(
+    namedtuple(
+        "_Coach",
+        [
+            "id",
+            "name",
+            "bio",
+            "available",
+            "birth_year",
+            "gender",
+            "languages",
+            "need",
+            "rights",
+            "housing",
+        ],
+    )
+):
     """A coach object - an entry in the database."""
 
     def __new__(
-        cls, *, id: Optional[int] = None, name: str, birth_year: int, gender: str
+        cls,
+        *,
+        id: Optional[int] = None,
+        name: str,
+        bio: str,
+        available: bool = True,
+        birth_year: int,
+        gender: str,
+        languages: List[Dict[str, int]],
+        need: int,
+        rights: int,
+        housing: int,
     ):
         return super().__new__(
-            cls, id=id, name=name, birth_year=birth_year, gender=gender
+            cls,
+            id=id,
+            name=name,
+            bio=bio,
+            available=available,
+            birth_year=birth_year,
+            gender=gender,
+            languages=languages,
+            need=need,
+            rights=rights,
+            housing=housing,
         )
 
     def to_json(self) -> Dict[str, Any]:
@@ -51,7 +91,8 @@ class CoachDB:
     ):
         """
         :param file:
-            File to use as persistent storage of the DB. If not found it will be created.
+            File to use as persistent storage of the DB. If not found it will be
+            created.
         :param auto_persist:
             Whether to automatically persist the DB to file on operations that
             modify the DB. Ignored if file is not given.
@@ -83,6 +124,7 @@ class CoachDB:
         db_coach = Coach(**{**coach.to_json(), "id": self._next_id})
         self._next_id += 1
         self._db[db_coach.id] = db_coach
+        logger.debug("Added coach with ID %d", coach.id)
         if self._auto_persist:
             self.persist(self._file)
         return db_coach
@@ -93,6 +135,8 @@ class CoachDB:
             self._db.pop(coach_id)
         except KeyError:
             raise KeyError(f"Coach with ID '{coach_id}' not found")
+        else:
+            logger.debug("Removed coach with ID %d", coach_id)
         if self._auto_persist:
             self.persist(self._file)
 
@@ -105,22 +149,28 @@ class CoachDB:
         if coach.id not in self._db:
             raise KeyError(f"Coach ID '{coach.id}' not found in DB")
         self._db[coach.id] = coach
+        logger.debug("Updated coach with ID %d", coach.id)
         if self._auto_persist:
             self.persist(self._file)
         return coach
 
     def persist(self, file: os.PathLike) -> None:
+        """Persist the database to a given file."""
+        logger.debug("Saving coaches DB to file: %s", file)
         data = dict(next_id=self._next_id, data=[c.to_json() for c in self])
         with open(file, "w") as f:
             json.dump(data, f)
 
     def _load_from_file(self, file: os.PathLike):
+        """Load data in from a given file, or create the file if it doesn't exist."""
         try:
             with open(file, "r") as f:
                 data = json.load(f)
+            logger.info("Loading in coaches DB from file: %s", file)
             self._db = {c["id"]: Coach.from_json(c) for c in data["data"]}
             self._next_id = data["next_id"]
         except FileNotFoundError:
+            logger.info("Coaches DB file not found, creating now: %s", file)
             self.persist(file)
 
 
@@ -132,43 +182,64 @@ COACH_DB_FILE = "./coach_db.json"
 
 
 # ------------------------------------------------------------------------------
+# Helpers
+# ------------------------------------------------------------------------------
+
+
+def _parse_languages(languages: str) -> Dict[str, int]:
+    ret = dict()
+    if not languages:
+        return ret
+    for lang in languages.split(","):
+        lang_name, proficiency = lang.split(":")
+        ret[lang_name] = int(proficiency)
+    return ret
+
+
+# ------------------------------------------------------------------------------
 # Route handlers
 # ------------------------------------------------------------------------------
 
 
-async def get_coaches() -> List[Coach]:
+def get_coaches() -> List[Coach]:
     return list(coach_db)
 
 
-async def get_coach(coach_id: int) -> Coach:
+def get_coach(coach_id: int) -> Coach:
     return coach_db.get(coach_id)
 
 
-async def create_coach(data: CoachJSON) -> Coach:
-    coach = Coach(name=data["name"], birth_year=1995, gender="male")
+def create_coach(data: CoachJSON) -> Coach:
+    data["languages"] = _parse_languages(data["languages"])
+    coach = Coach(**data)
     db_coach = coach_db.add(coach)
     return db_coach
 
 
-async def edit_coach(coach_id: int, data: CoachJSON) -> Coach:
-    updated_coach = Coach(
-        id=coach_id, name=data["name"], birth_year=1995, gender="male"
-    )
+def edit_coach(coach_id: int, data: CoachJSON) -> Coach:
+    kwargs = get_coach(coach_id).to_json()
+    if "languages" in data:
+        kwargs["languages"] = _parse_languages(data.pop("languages"))
+    kwargs.update(data)
+    updated_coach = Coach(**kwargs)
     db_coach = coach_db.update_entry(updated_coach)
     return db_coach
 
 
-async def delete_coach(coach_id: int) -> None:
+def delete_coach(coach_id: int) -> None:
     coach_db.remove(coach_id)
 
 
-async def get_coach_matches(data: CoachJSON) -> List[Coach]:
+def get_coach_matches(data: CoachJSON) -> List[Coach]:
     return []
 
 
 # ------------------------------------------------------------------------------
 # Routes
 # ------------------------------------------------------------------------------
+
+
+COMMON_HEADERS = {"Access-Control-Allow-Origin": "http://localhost:3000"}
 
 
 @app.route("/")
@@ -182,25 +253,32 @@ async def api_coaches(
     request: sanic.request.Request, coach_id: Optional[int] = None
 ) -> sanic.response.HTTPResponse:
     """HTTP API for 'coaches'."""
-    if request.method == "GET":
-        if coach_id is None:
-            coaches = await get_coaches()
-            response = sanic.response.json([c.to_json() for c in coaches])
-        else:
-            coach = await get_coach(coach_id)
+    try:
+        if request.method == "GET":
+            if coach_id is None:
+                coaches = get_coaches()
+                response = sanic.response.json([c.to_json() for c in coaches])
+            else:
+                coach = get_coach(coach_id)
+                response = sanic.response.json(coach.to_json())
+        elif request.method == "POST":
+            if coach_id is None:
+                coach = create_coach(request.json)
+            else:
+                coach = edit_coach(coach_id, request.json)
             response = sanic.response.json(coach.to_json())
-    elif request.method == "POST":
-        if coach_id is None:
-            coach = await create_coach(request.json)
+        elif request.method == "DELETE":
+            delete_coach(coach_id)
+            response = sanic.response.empty()
         else:
-            coach = await edit_coach(coach_id, request.json)
-        response = sanic.response.json(coach.to_json())
-    elif request.method == "DELETE":
-        await delete_coach(coach_id)
-        response = sanic.response.empty()
-    else:
-        assert False
+            assert False
+    except Exception:
+        logger.exception(
+            "Unexpected exception on %s route", request.path, exc_info=True
+        )
+        response = sanic.response.text("Error processing request", status=400)
 
+    response.headers = sanic.response.Header(COMMON_HEADERS)
     return response
 
 
@@ -209,11 +287,17 @@ async def api_coach_matches(
     request: sanic.request.Request,
 ) -> sanic.response.HTTPResponse:
     """HTTP API for 'coach-matches'."""
-    coaches = await get_coach_matches(request.args)
-    return sanic.response.json(
-        [c.to_json() for c in coaches],
-        headers={"Access-Control-Allow-Origin": "http://localhost:3000"},
-    )
+    try:
+        coaches = get_coach_matches(request.args)
+        response = sanic.response.json([c.to_json() for c in coaches])
+    except Exception:
+        logger.exception(
+            "Unexpected exception on %s route", request.path, exc_info=True
+        )
+        response = sanic.response.text("Error processing request", status=400)
+
+    response.headers = sanic.response.Header(COMMON_HEADERS)
+    return response
 
 
 # ------------------------------------------------------------------------------
@@ -224,6 +308,7 @@ async def api_coach_matches(
 def parse_args(argv: List[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--dev", action="store_true", help="Run in developer mode")
+    parser.add_argument("--debug", action="store_true", help="Turn on debug logging")
     return parser.parse_args(argv)
 
 
@@ -231,6 +316,8 @@ def main(argv: List[str]):
     global coach_db
 
     args = parse_args(argv)
+
+    logging.basicConfig(level=logging.DEBUG if args.debug else logging.INFO)
 
     coach_db = CoachDB(COACH_DB_FILE)
 

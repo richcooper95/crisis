@@ -1,37 +1,67 @@
 #!/usr/bin/env bash
 
 
+coach_json () {
+  echo """{
+    \"name\": \"$1\",
+    \"bio\": \"$2\",
+    \"available\": true,
+    \"birth_year\": $3,
+    \"gender\": \"$4\",
+    \"languages\": \"$5\",
+    \"need\": 1,
+    \"rights\": 2,
+    \"housing\": 3
+  }"""
+}
+
+
 echo "List empty DB"
+echo "-------------"
 curl localhost:8000/api/v1/coaches
+echo
 echo
 
 echo "Create coaches"
-curl -H "Content-Type: application/json" -d '{"name":"Bob"}' localhost:8000/api/v1/coaches
+echo "--------------"
+curl -H "Content-Type: application/json" -d "$(coach_json Bob 'Hey, Bob here.' 1992 male 'english:1,spanish:4')" localhost:8000/api/v1/coaches
 echo
-curl -H "Content-Type: application/json" -d '{"name":"Albert"}' localhost:8000/api/v1/coaches
+curl -H "Content-Type: application/json" -d "$(coach_json Albert '' 1990 other)" localhost:8000/api/v1/coaches
 echo
-curl -H "Content-Type: application/json" -d '{"name":"Marie"}' localhost:8000/api/v1/coaches
+curl -H "Content-Type: application/json" -d "$(coach_json Kelly '' 1988 female)" localhost:8000/api/v1/coaches
 echo
-curl -H "Content-Type: application/json" -d '{"name":"Kelly"}' localhost:8000/api/v1/coaches
+curl -H "Content-Type: application/json" -d "$(coach_json Susan '' 1993 female)" localhost:8000/api/v1/coaches
+echo
 echo
 
 echo "List DB"
+echo "-------"
 curl localhost:8000/api/v1/coaches
+echo
 echo
 
 echo "Get coach by ID"
+echo "---------------"
 curl localhost:8000/api/v1/coaches/1
+echo
 echo
 
 echo "Modify coach"
+echo "------------"
 curl -H "Content-Type: application/json" -d '{"name":"Kelly S."}' localhost:8000/api/v1/coaches/3
+echo
 echo
 
 echo "Remove coach"
+echo "------------"
 curl --request DELETE localhost:8000/api/v1/coaches/0
+echo
+echo
 
 
 echo "List DB"
+echo "-------"
 curl localhost:8000/api/v1/coaches
+echo
 echo
 
