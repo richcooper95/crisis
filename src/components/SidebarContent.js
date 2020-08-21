@@ -1,6 +1,6 @@
 import React from 'react'
 import { Transition } from 'react-transition-group'
-import { Home, PersonAdd, Add, Remove, Search, Help } from '@material-ui/icons';
+import { Home, PersonAdd, Add, Edit, Help } from '@material-ui/icons';
 
 const duration = 100
 
@@ -30,8 +30,7 @@ const sidebarButtonNames = {
     "home": "Home",
     "assign": "Assign Member",
     "add": "Add Coach",
-    "remove": "Remove Coach",
-    "search": "Search",
+    "edit": "Edit Coaches",
     "help": "Help & Support",
 }
 
@@ -63,8 +62,7 @@ export default class SidebarContent extends React.Component {
           {this.renderLink(<Home />, "home")}
           {this.renderLink(<PersonAdd />, "assign")}
           {this.renderLink(<Add />, "add")}
-          {this.renderLink(<Remove />, "remove")}
-          {this.renderLink(<Search />, "search")}
+          {this.renderLink(<Edit />, "edit")}
           {this.renderLink(<Help />, "help")}
         </div>
       )}

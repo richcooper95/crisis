@@ -110,12 +110,12 @@ export default class Assign extends React.Component {
   }
 
   onRightsChange(selectedList, currentItem) {
-    this.setState({rights: currentItem});
+    this.setState({rights: currentItem.type});
     console.log(currentItem);
   }
 
   onHousingChange(selectedList, currentItem) {
-    this.setState({housing: currentItem});
+    this.setState({housing: currentItem.type});
     console.log(currentItem);
   }
 
@@ -214,8 +214,8 @@ export default class Assign extends React.Component {
                 Enter the Member's rights status.
               </p>
               <Multiselect
-                options={numArray}
-                isObject={false}
+                options={rightsStatusOpts}
+                displayValue="desc"
                 closeIcon="cancel"
                 placeholder="Select Rights Status"
                 avoidHighlightFirstOption
@@ -229,8 +229,8 @@ export default class Assign extends React.Component {
                 Enter the Member's housing status.
               </p>
               <Multiselect
-                options={numArray}
-                isObject={false}
+                options={housingStatusOpts}
+                displayValue="desc"
                 closeIcon="cancel"
                 placeholder="Select Housing Status"
                 avoidHighlightFirstOption
