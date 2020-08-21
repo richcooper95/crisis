@@ -1,4 +1,12 @@
+# Crisis Coach Assignment Tool
+
+This project contains a web app to assist Crisis first responders with assigning a coach to a new member.
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+
+## Documentation
+
+Documentation is available [here](/docs/DOCS.md).
 
 ## Available Scripts
 
