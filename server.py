@@ -4,7 +4,7 @@ import logging
 import os
 import sys
 from collections import namedtuple
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Collection, Dict, List, Optional, Tuple, Union
 
 import sanic
 import sanic.request
@@ -53,11 +53,12 @@ class Coach(
         available: bool = True,
         birth_year: int,
         gender: str,
-        languages: List[Dict[str, int]],
-        need: int,
-        rights: int,
-        housing: int,
+        languages: Dict[str, int],
+        need: Collection[int],
+        rights: Collection[int],
+        housing: Collection[int],
     ):
+        # TODO: Validate args.
         return super().__new__(
             cls,
             id=id,
@@ -72,7 +73,7 @@ class Coach(
             housing=housing,
         )
 
-    def to_json(self) -> Dict[str, Any]:
+    def to_json(self) -> CoachJSON:
         return self._asdict()
 
     @classmethod
@@ -210,7 +211,6 @@ def get_coach(coach_id: int) -> Coach:
 
 
 def create_coach(data: CoachJSON) -> Coach:
-    data["languages"] = _parse_languages(data["languages"])
     coach = Coach(**data)
     db_coach = coach_db.add(coach)
     return db_coach
@@ -218,8 +218,6 @@ def create_coach(data: CoachJSON) -> Coach:
 
 def edit_coach(coach_id: int, data: CoachJSON) -> Coach:
     kwargs = get_coach(coach_id).to_json()
-    if "languages" in data:
-        kwargs["languages"] = _parse_languages(data.pop("languages"))
     kwargs.update(data)
     updated_coach = Coach(**kwargs)
     db_coach = coach_db.update_entry(updated_coach)
@@ -231,27 +229,41 @@ def delete_coach(coach_id: int) -> None:
 
 
 def get_coach_matches(data: CoachJSON) -> List[Tuple[int, Coach]]:
-    def get_best_lang_match(
-        coach: Coach, languages: Dict[str, int]
+    """
+    Get coaches based on how well they match the given data.
+
+    :param data:
+        Data to match on.
+    :return:
+        A list of tuples containing the match score and the matched coach.
+    """
+
+    def get_lang_match_score(
+        c: Coach, languages: Dict[str, int]
     ) -> Optional[Tuple[str, int]]:
-        try:
-            return min(
-                (L for L in languages if L in coach.languages), key=lambda L: L[1]
-            )
-        except ValueError:
-            return None
+        match_langs = [L for L in languages if L in c.languages]
+        return max(
+            (0, *[30 - 2 * (languages[L] * c.languages[L]) for L in match_langs])
+        )
 
     coach_matches = []
     for coach in get_coaches():
+        if not coach.available:
+            continue
         match_score = 0
-        best_lang_match = get_best_lang_match(coach, data.get("languages", []))
-        if best_lang_match:
-            match_score += (5 - best_lang_match[1]) * 10
+        match_score += get_lang_match_score(coach, data.get("languages", []))
+        if data.get("need") in coach.need:
+            match_score += 20
+        if data.get("rights") in coach.rights:
+            match_score += 10
+        if data.get("housing") in coach.housing:
+            match_score += 10
         if data.get("gender") == coach.gender:
             match_score += 5
         if "birth_year" in data:
             match_score += max(0, 10 - abs(data["birth_year"] - coach.birth_year))
         coach_matches.append((match_score, coach))
+
     return sorted(coach_matches, reverse=True)
 
 
@@ -310,7 +322,11 @@ async def api_coach_matches(
     """HTTP API for 'coach-matches'."""
     try:
         args = {k: v[0] for k, v in request.args.items()}
-        args["birth_year"] = int(args["birth_year"])
+        for int_arg in ["birth_year", "need", "rights", "housing"]:
+            if int_arg in args:
+                args[int_arg] = int(args[int_arg])
+        if "languages" in args:
+            args["languages"] = _parse_languages(args["languages"])
         coach_matches = get_coach_matches(args)
         response = sanic.response.json(
             [

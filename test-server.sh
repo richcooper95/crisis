@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e
+
 
 coach_json () {
   echo """{
@@ -8,10 +10,10 @@ coach_json () {
     \"available\": true,
     \"birth_year\": $3,
     \"gender\": \"$4\",
-    \"languages\": \"$5\",
-    \"need\": 1,
-    \"rights\": 2,
-    \"housing\": 3
+    \"languages\": {$5},
+    \"need\": [1, 2, 3],
+    \"rights\": [2],
+    \"housing\": [3]
   }"""
 }
 
@@ -24,13 +26,15 @@ echo
 
 echo "Create coaches"
 echo "--------------"
-curl -H "Content-Type: application/json" -d "$(coach_json Bob 'Hey, Bob here.' 1992 male 'english:1,spanish:4')" localhost:8000/api/v1/coaches
+curl -H "Content-Type: application/json" -d "$(coach_json Bob 'Hey, Bob here.' 1992 male '"english":1,"spanish":4')" localhost:8000/api/v1/coaches
 echo
 curl -H "Content-Type: application/json" -d "$(coach_json Albert '' 1990 other)" localhost:8000/api/v1/coaches
 echo
 curl -H "Content-Type: application/json" -d "$(coach_json Kelly '' 1988 female)" localhost:8000/api/v1/coaches
 echo
 curl -H "Content-Type: application/json" -d "$(coach_json Susan '' 1993 female)" localhost:8000/api/v1/coaches
+echo
+curl -H "Content-Type: application/json" -d "$(coach_json Mike '' 1970 male '"spanish":1,"french":2')" localhost:8000/api/v1/coaches
 echo
 echo
 
@@ -48,7 +52,7 @@ echo
 
 echo "Modify coach"
 echo "------------"
-curl -H "Content-Type: application/json" -d '{"name":"Kelly S."}' localhost:8000/api/v1/coaches/3
+curl -H "Content-Type: application/json" -d '{"name":"Kelly S."}' localhost:8000/api/v1/coaches/2
 echo
 echo
 
