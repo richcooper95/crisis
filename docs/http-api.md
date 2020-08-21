@@ -21,9 +21,35 @@ The 'coaches' object supports POST, GET and DELETE.
 
 #### Request body
 
-JSON object with the following fields:
- - name: string (required)
+JSON object with the following fields (all required):
+ - name: string
  - TODO
+
+#### Response
+
+TODO
+
+
+### Edit coach (POST)
+
+`POST /api/v1/coaches/<id>`
+
+#### Request body
+
+JSON object with the following fields (all optional):
+ - name: string
+ - TODO
+
+#### Response
+
+TODO
+
+
+### Fetch all coaches (GET)
+
+TBD
+
+`GET /api/v1/coaches/`
 
 #### Response
 
@@ -34,7 +60,7 @@ TODO
 
 TBD
 
-`GET /api/v1/coach/<id>`
+`GET /api/v1/coaches/<id>`
 
 #### Response
 
@@ -43,9 +69,7 @@ TODO
 
 ### Delete coach (DELETE)
 
-`DELETE /api/v1/coach/<id>`
-
-TODO - is 'id' the right thing to be passing?
+`DELETE /api/v1/coaches/<id>`
 
 #### Response
 
@@ -66,10 +90,10 @@ The 'coach-matches' object supports GET only. This corresponds to looking up coa
 Parameters are as follows (all optional):
  - age: integer
  - gender: 'male', 'female' or 'other'
- - languages: string (comma-separated list)
- - need: TODO
- - rights: TODO
- - housing: TODO
+ - languages: string (a comma separated list of "\<language\>:\<proficiency\>")
+ - need: integer
+ - rights: integer
+ - housing: integer
 
 #### Response
 

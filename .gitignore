@@ -138,6 +138,7 @@ dmypy.json
 
 # production
 /build
+coach_db.json
 
 # misc
 .DS_Store
