@@ -238,13 +238,29 @@ def get_coach_matches(data: CoachJSON) -> List[Tuple[int, Coach]]:
         A list of tuples containing the match score and the matched coach.
     """
 
-    def get_lang_match_score(
-        c: Coach, languages: Dict[str, int]
-    ) -> Optional[Tuple[str, int]]:
+    def get_lang_match_score(c: Coach, languages: Dict[str, int]) -> int:
+        """
+        Calculate the match score between a coach and a set of language
+        proficiencies.
+
+        The score is determined based on the single language that has the best
+        match (minimum score of 0).
+
+        The formula used is:
+            30 - 2 * <coach proficiency> * <other proficiency>
+        where the proficiencies are assumed to be small integers with lower
+        numbers corresponding to higher proficiency.
+
+        This means the range of scores given is 0-29.
+
+        Example:
+            Coach has english:1,spanish:2,french:4
+            Other has english:5,spanish:3,french:3
+            Language compatibility scores are english:20,spanish:18,french:6
+            Overall score is 20 (for English).
+        """
         match_langs = [L for L in languages if L in c.languages]
-        return max(
-            (0, *[30 - 2 * (languages[L] * c.languages[L]) for L in match_langs])
-        )
+        return max((0, *[30 - 2 * languages[L] * c.languages[L] for L in match_langs]))
 
     coach_matches = []
     for coach in get_coaches():
@@ -261,7 +277,7 @@ def get_coach_matches(data: CoachJSON) -> List[Tuple[int, Coach]]:
         if data.get("gender") == coach.gender:
             match_score += 5
         if "birth_year" in data:
-            match_score += max(0, 10 - abs(data["birth_year"] - coach.birth_year))
+            match_score += max(0, 5 - abs(data["birth_year"] - coach.birth_year) // 2)
         coach_matches.append((match_score, coach))
 
     return sorted(coach_matches, reverse=True)
