@@ -1,5 +1,7 @@
 import React from 'react';
 import Assign from './Assign';
+import Add from './Add';
+import Edit from './Edit';
 
 export default class Arena extends React.Component {
   constructor(props) {
@@ -11,6 +13,14 @@ export default class Arena extends React.Component {
 
   renderAssign() {
     return (<Assign />)
+  }
+
+  renderAdd() {
+    return (<Add />)
+  }
+
+  renderEdit() {
+    return (<Edit />)
   }
 
   renderHelp() {
@@ -56,6 +66,12 @@ export default class Arena extends React.Component {
 
       case "assign":
         return this.renderAssign();
+
+      case "add":
+        return this.renderAdd();
+
+      case "edit":
+        return this.renderEdit();
 
       case "home":
         return this.renderHome();
