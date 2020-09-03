@@ -61,9 +61,15 @@ export default class Assign extends React.Component {
         buttons: [
           {
             label: 'Confirm',
-            onClick: () => console.log(
-              "Confirmed form: " + JSON.stringify(this.state)
-            )
+            onClick: () => {
+              // TODO: Generate URL with params (make sure to use a proper API
+              //       so that spaces etc. are properly handled!).
+              // TODO: Hardcode to localhost:8000 for development mode.
+              fetch('/api/v1/coach-matches?birth_year=1979&gender=male&languages=english:1,french:3&need=1&rights=2&housing=3')
+                .then(response => response.json())
+                .then(data => console.log(data))
+              console.log("Confirmed form: " + JSON.stringify(this.state));
+            }
           },
           {
             label: 'Go back',
