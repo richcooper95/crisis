@@ -7,7 +7,7 @@ export default class Arena extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      status: "idle",
+     loading: false,
     }
   }
 
