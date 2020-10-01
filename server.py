@@ -288,7 +288,11 @@ def get_coach_matches(data: CoachJSON) -> List[Tuple[int, Coach]]:
 # ------------------------------------------------------------------------------
 
 
-COMMON_HEADERS = {"Access-Control-Allow-Origin": "http://localhost:3000"}
+COMMON_HEADERS = {
+    "Access-Control-Allow-Origin": "http://localhost:3000",
+    "Access-Control-Allow-Methods": "POST, GET, DELETE, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type"
+}
 
 
 @app.route("/")
@@ -296,7 +300,7 @@ async def index(request: sanic.request.Request) -> sanic.response.HTTPResponse:
     return await sanic.response.file("build/index.html")
 
 
-@app.route("/api/v1/coaches", methods=["GET", "POST"])
+@app.route("/api/v1/coaches", methods=["GET", "POST", "OPTIONS"])
 @app.route("/api/v1/coaches/<coach_id:int>", methods=["GET", "POST", "DELETE"])
 async def api_coaches(
     request: sanic.request.Request, coach_id: Optional[int] = None
@@ -318,6 +322,8 @@ async def api_coaches(
             response = sanic.response.json(coach.to_json())
         elif request.method == "DELETE":
             delete_coach(coach_id)
+            response = sanic.response.empty()
+        elif request.method == "OPTIONS":
             response = sanic.response.empty()
         else:
             assert False

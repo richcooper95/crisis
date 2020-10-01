@@ -91,14 +91,9 @@ export default class Add extends React.Component {
             label: 'Confirm',
             onClick: () => {
               // Hardcode to localhost:8000 for development mode.
-              // TODO: This is currently of content type "text/plain" as
-              // "application/json" was sending an OPTIONS request first, 
-              // which was screwing stuff up. May just be a case of allowing
-              // OPTIONS from the server side?
-              // https://stackoverflow.com/questions/1256593/why-am-i-getting-an-options-request-instead-of-a-get-request
               fetch('http://localhost:8000/api/v1/coaches', {
                 method: 'POST',
-                headers: {'Content-Type': 'text/plain'},
+                headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({
                   'name': this.state.firstName,
                   'bio': this.state.bio,
