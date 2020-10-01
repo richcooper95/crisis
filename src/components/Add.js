@@ -70,6 +70,12 @@ export default class Add extends React.Component {
     let invalidElements = this.invalidFormElements();
 
     if (!invalidElements) {
+      // TODO: Have some way of specifying language ability from the GUI -
+      // forgot about this!
+      let languageMap = {};
+      for (const lang of this.state.languages) {
+        languageMap[lang] = 1;
+      }
       confirmAlert({
         title: 'Confirm Coach Details',
         message: ('First name: ' + this.state.firstName +
@@ -84,10 +90,27 @@ export default class Add extends React.Component {
           {
             label: 'Confirm',
             onClick: () => {
-              // TODO: Generate URL with params (make sure to use a proper API
-              //       so that spaces etc. are properly handled!).
-              // TODO: Hardcode to localhost:8000 for development mode.
-              fetch('/api/v1/coach-matches?birth_year=1979&gender=male&languages=english:1,french:3&need=1&rights=2&housing=3')
+              // Hardcode to localhost:8000 for development mode.
+              // TODO: This is currently of content type "text/plain" as
+              // "application/json" was sending an OPTIONS request first, 
+              // which was screwing stuff up. May just be a case of allowing
+              // OPTIONS from the server side?
+              // https://stackoverflow.com/questions/1256593/why-am-i-getting-an-options-request-instead-of-a-get-request
+              fetch('http://localhost:8000/api/v1/coaches', {
+                method: 'POST',
+                headers: {'Content-Type': 'text/plain'},
+                body: JSON.stringify({
+                  'name': this.state.firstName,
+                  'bio': this.state.bio,
+                  'available': this.state.available,
+                  'birth_year': this.state.birthYear,
+                  'gender': this.state.gender,
+                  'languages': languageMap,
+                  'need': this.state.needLevels.map(obj => obj.type),
+                  'rights': this.state.rightsLevels.map(obj => obj.type),
+                  'housing': this.state.housingLevels.map(obj => obj.type)
+              })
+              })
                 .then(response => response.json())
                 .then(data => console.log(data))
               console.log("Confirmed form: " + JSON.stringify(this.state));
