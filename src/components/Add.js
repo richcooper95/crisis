@@ -140,8 +140,10 @@ export default class Add extends React.Component {
     Object.entries(this.state).forEach((entry) => {
       console.dir(entry);
       if (!entry[1] || (Array.isArray(entry[1]) && entry[1].length === 0)) {
-        // Allow the "available" value to be false!
-        if (entry[0] !== "available") {
+        // Allow the "available" value to be false
+        // Allow the biography to be empty
+        let nullableEntries = ["available", "bio"]
+        if (!nullableEntries.includes(entry[0])) {
           invalidItems.push(entry[0]);
         }
       }
