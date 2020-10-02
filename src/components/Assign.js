@@ -295,7 +295,7 @@ class AssignForm extends React.Component {
   }
 
   getCoachMatchUrl() {
-    var url_fmt = "/api/v1/coach-matches?birth_year={0}&gender={1}&languages={2}&need={3}&rights={4}&housing={5}";
+    var url_fmt = "http://localhost:8000/api/v1/coach-matches?birth_year={0}&gender={1}&languages={2}&need={3}&rights={4}&housing={5}";
 
     var url = this.format(url_fmt,
                           this.state.year,
