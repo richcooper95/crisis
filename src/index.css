@@ -211,7 +211,7 @@ body.react-confirm-alert-body-element {
   height: 460px;
 }
 
-.assign-form-right {
+.assign-form-right, .add-form-right {
   margin-left: 450px;
   margin-top: -508px;
   padding-left: 50px;
@@ -220,11 +220,7 @@ body.react-confirm-alert-body-element {
 }
 
 .add-form-right {
-  margin-left: 450px;
   margin-top: -480px;
-  padding-left: 50px;
-  width: 450px;
-  height: 500px;
 }
 
 .proficiency-choice {
