@@ -30,28 +30,6 @@ const langProficiencyOpts = [
   {"type": 3, "desc": "3 - Ugly"},
 ]
 
-function joinLevels(levelArray) {
-  let ret_string = '';
-  for (const element of levelArray) {
-    if (ret_string) {
-      ret_string += ', '
-    }
-    ret_string += element.desc;
-  }
-  return(ret_string);
-}
-
-function joinLanguages(langObj) {
-  let ret_string = '';
-  for (const lang in langObj) {
-    if (ret_string) {
-      ret_string += ', '
-    }
-    ret_string += lang + ': ' + langObj[lang]
-  }
-  return(ret_string);
-}
-
 function capitalise(str) {
     return str.charAt(0).toUpperCase() + str.slice(1);
 }
@@ -120,7 +98,7 @@ export default class Add extends React.Component {
     var languages_str = "";
 
     Object.entries(this.state.languages).forEach((entry) => {
-      languages_str += this.capitalize(entry[0]) + " (" + entry[1] + "), ";
+      languages_str += capitalise(entry[0]) + " (" + entry[1] + "), ";
     })
 
     return languages_str.slice(0, -2);
@@ -148,10 +126,10 @@ export default class Add extends React.Component {
                   '\nBirth year: ' + this.state.birthYear +
                   '\nGender: ' + capitalise(this.state.gender) +
                   '\nAvailability: ' + (this.state.available ? 'Available' : 'Not available') +
-                  '\nLanguages: ' + joinLanguages(this.state.languages) +
-                  '\nExperience in Level of Need: ' + joinLevels(this.state.needLevels) +
-                  '\nExperience in Rights Status: ' + joinLevels(this.state.rightsLevels) +
-                  '\nExperience in Housing Status: ' + joinLevels(this.state.housingLevels)),
+                  '\nLanguages: ' + this.getLanguagesDisplay(this.state.languages) +
+                  '\nExperience in Level of Need: ' + this.getExperienceDisplay(this.state.needLevels) +
+                  '\nExperience in Rights Status: ' + this.getExperienceDisplay(this.state.rightsLevels) +
+                  '\nExperience in Housing Status: ' + this.getExperienceDisplay(this.state.housingLevels)),
         buttons: [
           {
             label: 'Confirm',
