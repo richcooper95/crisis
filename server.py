@@ -302,7 +302,7 @@ async def api_coaches(
     request: sanic.request.Request, coach_id: Optional[int] = None
 ) -> sanic.response.HTTPResponse:
     """HTTP API for 'coaches'."""
-    headers = COMMON_HEADERS.copy()
+    headers = COMMON_HEADERS
 
     try:
         if request.method == "GET":
@@ -322,6 +322,7 @@ async def api_coaches(
             delete_coach(coach_id)
             response = sanic.response.empty()
         elif request.method == "OPTIONS":
+            headers = headers.copy()
             headers.update({
                 "Access-Control-Allow-Methods": "POST, GET, DELETE, OPTIONS",
                 "Access-Control-Allow-Headers": "Content-Type"
