@@ -1,6 +1,7 @@
 import React from 'react';
 import { Multiselect } from 'multiselect-react-dropdown';
 import { confirmAlert } from 'react-confirm-alert';
+import Loader from 'react-loader-spinner';
 //import 'react-confirm-alert/src/react-confirm-alert.css';
 
 const levelOfNeedOpts = [
@@ -30,11 +31,96 @@ const langProficiencyOpts = [
   {"type": 3, "desc": "3 - Ugly"},
 ]
 
+const displays = {
+  FORM: "form",
+  LOADING: "loading",
+}
+
 function capitalise(str) {
     return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
 export default class Add extends React.Component {
+  constructor(props) {
+    super(props);
+    this.handleSubmitConfirm = this.handleSubmitConfirm.bind(this);
+    this.state = {
+      display: displays.FORM,
+    }
+  }
+
+  handleSubmitConfirm(form_data) {
+    console.log("Confirmed form: " + JSON.stringify(form_data));
+    this.setState({display: displays.LOADING})
+
+    // Hardcode to localhost:8000 for development mode.
+    fetch('http://localhost:8000/api/v1/coaches', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(form_data)
+    })
+    .then(response => {
+      if (!response.ok) {
+        console.error("Failed to submit, got response code: " + response.status)
+        response.text().then(text => alert(`An error occured: ${text}`))
+      }
+      else {
+        console.log("Successfully submitted with response: " + response.status)
+        alert(`Coach ${form_data.name} was successfully added`)
+      }
+      this.setState({display: displays.FORM})
+    })
+    .catch(error => {
+      console.error("There was a problem: " + error)
+      alert(`An error occured: ${error}`)
+      this.setState({display: displays.FORM})
+    })
+  }
+
+  render() {
+    var display = null;
+
+    switch (this.state.display) {
+      case displays.FORM:
+        display = <AddForm handleSubmitConfirm={this.handleSubmitConfirm} />;
+        break;
+
+      case displays.LOADING:
+        display = <AddLoader />;
+        break;
+
+      default:
+        // TODO: Sensible default here? Or maybe just make the form the default?
+        break;
+    }
+
+    return (display);
+  }
+}
+
+function AddLoader(props) {
+  return (
+    // @@@ This doesn't seem to justify the spinner in the centre...
+    <div
+      style={{
+        width: "100vw",
+        height: "100vh",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center"
+      }}
+    >
+    <Loader 
+      type="TailSpin"
+      color="#EC2229"
+      height={80}
+      width={80}
+    />
+    </div>
+  )
+}
+
+class AddForm extends React.Component {
   constructor(props) {
     super(props);
     this.renderLanguageProficiencies = this.renderLanguageProficiencies.bind(this);
@@ -134,11 +220,8 @@ export default class Add extends React.Component {
           {
             label: 'Confirm',
             onClick: () => {
-              // Hardcode to localhost:8000 for development mode.
-              fetch('http://localhost:8000/api/v1/coaches', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({
+              this.props.handleSubmitConfirm(
+                {
                   'name': this.state.name,
                   'bio': this.state.bio,
                   'available': this.state.available,
@@ -148,11 +231,8 @@ export default class Add extends React.Component {
                   'need': this.state.needLevels.map(obj => obj.type),
                   'rights': this.state.rightsLevels.map(obj => obj.type),
                   'housing': this.state.housingLevels.map(obj => obj.type)
-              })
-              })
-                .then(response => response.json())
-                .then(data => console.log(data))
-              console.log("Confirmed form: " + JSON.stringify(this.state));
+                }
+              )
             }
           },
           {
