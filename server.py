@@ -288,11 +288,7 @@ def get_coach_matches(data: CoachJSON) -> List[Tuple[int, Coach]]:
 # ------------------------------------------------------------------------------
 
 
-COMMON_HEADERS = {
-    "Access-Control-Allow-Origin": "http://localhost:3000",
-    "Access-Control-Allow-Methods": "POST, GET, DELETE, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type"
-}
+COMMON_HEADERS = {"Access-Control-Allow-Origin": "http://localhost:3000"}
 
 
 @app.route("/")
@@ -306,6 +302,8 @@ async def api_coaches(
     request: sanic.request.Request, coach_id: Optional[int] = None
 ) -> sanic.response.HTTPResponse:
     """HTTP API for 'coaches'."""
+    headers = COMMON_HEADERS.copy()
+
     try:
         if request.method == "GET":
             if coach_id is None:
@@ -324,6 +322,10 @@ async def api_coaches(
             delete_coach(coach_id)
             response = sanic.response.empty()
         elif request.method == "OPTIONS":
+            headers.update({
+                "Access-Control-Allow-Methods": "POST, GET, DELETE, OPTIONS",
+                "Access-Control-Allow-Headers": "Content-Type"
+            })
             response = sanic.response.empty()
         else:
             assert False
@@ -333,7 +335,7 @@ async def api_coaches(
         )
         response = sanic.response.text("Error processing request", status=400)
 
-    response.headers = sanic.response.Header(COMMON_HEADERS)
+    response.headers = sanic.response.Header(headers)
     return response
 
 
