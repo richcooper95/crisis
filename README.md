@@ -13,7 +13,8 @@ Documentation is available [here](/docs/DOCS.md).
 These instructions assume the development environment is Ubuntu on Windows Subsystem for Linux (WSL), though should easily adaptable to other Ubuntu installations.
 
 1. Install nodejs and NPM using [these instructions](https://tecadmin.net/install-latest-nodejs-npm-on-ubuntu/).
-1. Install the Yarn package manager using the instructions near the end of the output from script run in previous step.
+1. Install the Yarn package manager using the instructions that appear near the end of the output of the previous step.
+1. Clone this repository and run `yarn install` from the root directory of your clone.
 
 ## Available Scripts
 
