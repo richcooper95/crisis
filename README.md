@@ -8,6 +8,14 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 
 Documentation is available [here](/docs/DOCS.md).
 
+## Setup
+
+These instructions assume the development environment is Ubuntu on Windows Subsystem for Linux (WSL), though should be easily adaptable to other Ubuntu installations.
+
+1. Install nodejs and NPM using [these instructions](https://tecadmin.net/install-latest-nodejs-npm-on-ubuntu/).
+1. Install the Yarn package manager using the instructions that appear near the end of the output of the previous step.
+1. Clone this repository and run `yarn install` from the root directory of your clone.
+
 ## Available Scripts
 
 In the project directory, you can run:
