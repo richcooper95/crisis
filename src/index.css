@@ -211,12 +211,16 @@ body.react-confirm-alert-body-element {
   height: 460px;
 }
 
-.assign-form-right {
+.assign-form-right, .add-form-right {
   margin-left: 450px;
   margin-top: -508px;
   padding-left: 50px;
   width: 450px;
   height: 500px;
+}
+
+.add-form-right {
+  margin-top: -480px;
 }
 
 .proficiency-choice {
@@ -228,7 +232,7 @@ body.react-confirm-alert-body-element {
   width: 190px;
 }
 
-.assign-form-submit > button {
+.assign-form-submit button, .add-form-submit button {
   outline: none;
   background: rgba(236, 34, 41, 0.934);
   border: none;
@@ -240,4 +244,14 @@ body.react-confirm-alert-body-element {
   border-radius: 5px;
   font-size: 12px;
   cursor: pointer;
+}
+
+.add-form-submit button {
+  margin-top: 150px;
+
+}
+
+textarea {
+  width: 450px;
+  height: 100px;
 }
