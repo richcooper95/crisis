@@ -2,12 +2,7 @@ import React from 'react';
 import { Multiselect } from 'multiselect-react-dropdown';
 import { confirmAlert } from 'react-confirm-alert';
 import Loader from 'react-loader-spinner';
-import Table from 'react-bootstrap/Table';
-import "react-loader-spinner/dist/loader/css/react-spinner-loader.css"
 //import 'react-confirm-alert/src/react-confirm-alert.css';
-
-// @@@ Used in testing
-//const dummyResults = [{"id":0,"name":"Bob","bio":"Hey, Bob here.","available":true,"birth_year":1992,"gender":"male","languages":{"english":1,"spanish":4},"need":[1,2,3],"rights":[2],"housing":[3],"match_score":35},{"id":4,"name":"Mike","bio":"","available":true,"birth_year":1970,"gender":"male","languages":{"spanish":1,"french":2},"need":[1,2,3],"rights":[2],"housing":[3],"match_score":5},{"id":1,"name":"Albert","bio":"","available":true,"birth_year":1990,"gender":"other","languages":{},"need":[1,2,3],"rights":[2],"housing":[3],"match_score":5},{"id":2,"name":"Kelly S.","bio":"","available":true,"birth_year":1988,"gender":"female","languages":{},"need":[1,2,3],"rights":[2],"housing":[3],"match_score":4}]
 
 const levelOfNeedOpts = [
   {"type": 1, "desc": "1 - No intervention necessary"},
@@ -39,42 +34,46 @@ const langProficiencyOpts = [
 const displays = {
   FORM: "form",
   LOADING: "loading",
-  RESULTS: "results",
 }
 
-export default class Assign extends React.Component {
+function capitalise(str) {
+    return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+export default class Add extends React.Component {
   constructor(props) {
     super(props);
     this.handleSubmitConfirm = this.handleSubmitConfirm.bind(this);
     this.state = {
       display: displays.FORM,
-      results: null,
-      error: null,
     }
   }
 
-  sleep (ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-  }
-
-  handleSubmitConfirm(form_data, url) {
+  handleSubmitConfirm(form_data) {
     console.log("Confirmed form: " + JSON.stringify(form_data));
-    // TODO: Generate URL with params (make sure to use a proper API
-    //       so that spaces etc. are properly handled!).
-    // TODO: Hardcode to localhost:8000 for development mode.
-    this.setState({ display: displays.LOADING }, () => {
-      // TODO: Decide whether to keep this sleep (currently so I can see the loading wheel)
-      this.sleep(2000).then(() => {fetch(url)
-        .then(response => response.json())
-        .then(data => this.setState({
-          results: data,
-          display: displays.RESULTS,
-        }))
-        .catch(error => this.setState({ // TODO: better error handling here?
-          error: error,
-          display: displays.FORM
-        }))
-      })
+    this.setState({display: displays.LOADING})
+
+    // Hardcode to localhost:8000 for development mode.
+    fetch('http://localhost:8000/api/v1/coaches', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(form_data)
+    })
+    .then(response => {
+      if (!response.ok) {
+        console.error("Failed to submit, got response code: " + response.status)
+        response.text().then(text => alert(`An error occured: ${text}`))
+      }
+      else {
+        console.log("Successfully submitted with response: " + response.status)
+        alert(`Coach ${form_data.name} was successfully added`)
+      }
+      this.setState({display: displays.FORM})
+    })
+    .catch(error => {
+      console.error("There was a problem: " + error)
+      alert(`An error occured: ${error}`)
+      this.setState({display: displays.FORM})
     })
   }
 
@@ -83,20 +82,13 @@ export default class Assign extends React.Component {
 
     switch (this.state.display) {
       case displays.FORM:
-        display = <AssignForm
-                    handleSubmitConfirm={this.handleSubmitConfirm}
-                    error={this.state.error}
-                  />;
+        display = <AddForm handleSubmitConfirm={this.handleSubmitConfirm} />;
         break;
-      
+
       case displays.LOADING:
-        display = <AssignLoader />;
+        display = <AddLoader />;
         break;
-      
-      case displays.RESULTS:
-        display = <AssignResults coachResults={this.state.results} />;
-        break;
-    
+
       default:
         // TODO: Sensible default here? Or maybe just make the form the default?
         break;
@@ -106,106 +98,29 @@ export default class Assign extends React.Component {
   }
 }
 
-function AssignLoader(props) {
+function AddLoader(props) {
   return (
     // @@@ This doesn't seem to justify the spinner in the centre...
     <div
       style={{
-        width: "100%",
-        height: "300vh",
+        width: "100vw",
+        height: "100vh",
         display: "flex",
         justifyContent: "center",
         alignItems: "center"
       }}
     >
-      <Loader 
-        type="TailSpin"
-        color="#EC2229"
-        height={80}
-        width={80}
-      />
+    <Loader 
+      type="TailSpin"
+      color="#EC2229"
+      height={80}
+      width={80}
+    />
     </div>
   )
 }
 
-class AssignResults extends React.Component {
-  constructor(props) {
-    super(props);
-    this.getTableFragments = this.getTableFragments.bind(this);
-    this.getLanguagesTable = this.getLanguagesTable.bind(this);
-  }
-
-  /*
-   * SUMMARY:
-   * 1. Get 'this is undefined' when trying to call getLanguagesTable.
-   */
-
-  getTableFragments() {
-    let tableFragments = [];
-
-    this.props.coachResults.forEach(function (item, i) {
-    //dummyResults.forEach(function (item, i) {
-      //let languages = this.getLanguagesTable(item.languages);
-      // @@@ 'languages' just below needs to be changed to use {}.
-      // @@@ Need to change need, rights and housing to their desc.
-      tableFragments.push(
-        <tr>
-          <td>{item.match_score}</td>
-          <td>{item.id}</td>
-          <td>{item.name}</td>
-          <td>{item.birth_year}</td>
-          <td>{item.gender}</td>
-          <td>languages</td>
-          <td>{item.need}</td>
-          <td>{item.rights}</td>
-          <td>{item.housing}</td>
-          <td>{item.bio}</td>
-        </tr>
-      )
-    });
-
-    return tableFragments;
-  }
-
-  getLanguagesTable(languages) {
-    var languages_str = "";
-
-    Object.entries(languages).forEach((entry) => {
-      languages_str += this.capitalize(entry[0]) + " (" + entry[1] + ")\n";
-    })
-
-    return languages_str.slice(0, -2);
-  }
-
-  render() {
-    console.log(this.props.coachResults);
-    return (
-      <div>
-        <Table striped border hover size="sm">
-          <thead>
-            <tr>
-              <th>Score</th>
-              <th>ID</th>
-              <th>Name</th>
-              <th>Year</th>
-              <th>Gender</th>
-              <th>Languages</th>
-              <th>Need</th>
-              <th>Rights</th>
-              <th>Housing</th>
-              <th>Bio</th>
-            </tr>
-          </thead>
-          <tbody>
-            {this.getTableFragments()}
-          </tbody>
-        </Table>
-      </div>
-    );
-  }
-}
-
-class AssignForm extends React.Component {
+class AddForm extends React.Component {
   constructor(props) {
     super(props);
     this.renderLanguageProficiencies = this.renderLanguageProficiencies.bind(this);
@@ -218,13 +133,19 @@ class AssignForm extends React.Component {
     this.onHousingChange = this.onHousingChange.bind(this);
     this.onYearOfBirthChange = this.onYearOfBirthChange.bind(this);
     this.onGenderChange = this.onGenderChange.bind(this);
+    this.onNameChange = this.onNameChange.bind(this);
+    this.onAvailableChange = this.onAvailableChange.bind(this);
+    this.onBioChange = this.onBioChange.bind(this);
     this.state = {
       languages: {},
-      need: null,
-      housing: null,
-      rights: null,
-      year: 0,
+      needLevels: null,
+      housingLevels: null,
+      rightsLevels: null,
+      birthYear: 0,
+      name: null,
       gender: null,
+      available: true,
+      bio: null,
     };
   }
 
@@ -263,72 +184,56 @@ class AssignForm extends React.Component {
     var languages_str = "";
 
     Object.entries(this.state.languages).forEach((entry) => {
-      languages_str += this.capitalize(entry[0]) + " (" + entry[1] + "), ";
+      languages_str += capitalise(entry[0]) + " (" + entry[1] + "), ";
     })
 
     return languages_str.slice(0, -2);
   }
 
-  capitalize(string) {
-    return string.charAt(0).toUpperCase() + string.slice(1);
-  }
+  getExperienceDisplay(experience) {
+    var experience_str = "";
 
-  format = function() {
-    var s = arguments[0];
-
-    for (var i = 0; i < arguments.length - 1; i++) {
-      var regex = new RegExp("\\{" + i + "\\}", "gm");
-      s = s.replace(regex, arguments[i + 1]);
+    for (let i = 0; i < experience.length; i++) {
+      const obj = experience[i];
+      experience_str += obj.desc + " (" + obj.type + "), ";
     }
 
-    return s;
-  }
-
-  getLanguagesForUrl() {
-    var languages_str = "";
-
-    Object.entries(this.state.languages).forEach((entry) => {
-      languages_str += this.format("{0}:{1},", entry[0], entry[1]);
-    })
-
-    return languages_str.slice(0, -1);
-  }
-
-  getCoachMatchUrl() {
-    var url_fmt = "http://localhost:8000/api/v1/coach-matches?birth_year={0}&gender={1}&languages={2}&need={3}&rights={4}&housing={5}";
-
-    var url = this.format(url_fmt,
-                          this.state.year,
-                          this.state.gender,
-                          this.getLanguagesForUrl(),
-                          this.state.need,
-                          this.state.rights,
-                          this.state.housing);
-
-    return url;
+    return experience_str.slice(0, -2);
   }
 
   handleSubmit(event) {
     event.preventDefault();
-    //const data = new FormData(event.target);
     let invalidElements = this.invalidFormElements();
-
+    console.log(invalidElements);
     if (!invalidElements) {
       confirmAlert({
-        title: 'Confirm Member Details',
-        message: ('Year of Birth: ' + this.state.year +
-                  '\nGender: ' + this.capitalize(this.state.gender) +
-                  '\nLanguages: ' + this.getLanguagesDisplay() +
-                  '\nLevel of Need: ' + this.state.need +
-                  '\nRights Status: ' + this.state.rights +
-                  '\nHousing Status: ' + this.state.housing),
+        title: 'Confirm Coach Details',
+        message: ('First name: ' + this.state.name +
+                  '\nBirth year: ' + this.state.birthYear +
+                  '\nGender: ' + capitalise(this.state.gender) +
+                  '\nAvailability: ' + (this.state.available ? 'Available' : 'Not available') +
+                  '\nLanguages: ' + this.getLanguagesDisplay(this.state.languages) +
+                  '\nExperience in Level of Need: ' + this.getExperienceDisplay(this.state.needLevels) +
+                  '\nExperience in Rights Status: ' + this.getExperienceDisplay(this.state.rightsLevels) +
+                  '\nExperience in Housing Status: ' + this.getExperienceDisplay(this.state.housingLevels)),
         buttons: [
           {
             label: 'Confirm',
-            onClick: () => this.props.handleSubmitConfirm(
-              this.state,
-              this.getCoachMatchUrl(),
-            )
+            onClick: () => {
+              this.props.handleSubmitConfirm(
+                {
+                  'name': this.state.name,
+                  'bio': this.state.bio,
+                  'available': this.state.available,
+                  'birth_year': this.state.birthYear,
+                  'gender': this.state.gender,
+                  'languages': this.state.languages,
+                  'need': this.state.needLevels.map(obj => obj.type),
+                  'rights': this.state.rightsLevels.map(obj => obj.type),
+                  'housing': this.state.housingLevels.map(obj => obj.type)
+                }
+              )
+            }
           },
           {
             label: 'Go back',
@@ -337,8 +242,8 @@ class AssignForm extends React.Component {
       })
     } else {
       confirmAlert({
-        title: 'Incomplete Form',
-        message: ('The data form is incomplete.\n\nPlease fill in the remaining fields.'),
+        title: 'Invalid Form',
+        message: ('The data form is invalid or incomplete.\n\nPlease check the fields of the form again.'),
         buttons: [
           {
             label: 'Go back'
@@ -350,10 +255,17 @@ class AssignForm extends React.Component {
 
   invalidFormElements() {
     var invalidItems = [];
+    var letters = /^[A-Za-z]+$/;
 
     Object.entries(this.state).forEach((entry) => {
+      console.dir(entry);
       if (!entry[1] || (Array.isArray(entry[1]) && entry[1].length === 0)) {
-        invalidItems.push(entry[0]);
+        // Allow the "available" value to be false
+        // Allow the biography to be empty
+        let nullableEntries = ["available", "bio"]
+        if (!nullableEntries.includes(entry[0])) {
+          invalidItems.push(entry[0]);
+        }
       }
     })
 
@@ -363,11 +275,29 @@ class AssignForm extends React.Component {
       }
     })
 
+    if (!this.state.name.match(letters)) {
+      invalidItems.push(this.state.name)
+    }
+
     if (invalidItems.length > 0) {
       return(invalidItems);
     } else {
       return(null);
     }
+  }
+
+  onNameChange(event) {
+    this.setState({name: event.target.value});
+  }
+
+  onAvailableChange(e) {
+    this.setState({available: e.target.checked});
+    console.log("Availability change: " + e.target.checked);
+  }
+
+  onBioChange(e) {
+    this.setState({bio: e.target.value});
+    console.log("Bio change: " + e.target.value);
   }
 
   onLanguagesAdd(selectedList, currentItem) {
@@ -392,22 +322,22 @@ class AssignForm extends React.Component {
   }
 
   onNeedChange(selectedList, currentItem) {
-    this.setState({need: currentItem.type});
-    console.log(currentItem);
+    this.setState({needLevels: selectedList.slice()});
+    console.log(selectedList);
   }
 
   onRightsChange(selectedList, currentItem) {
-    this.setState({rights: currentItem.type});
-    console.log(currentItem);
+    this.setState({rightsLevels: selectedList.slice()});
+    console.log(selectedList);
   }
 
   onHousingChange(selectedList, currentItem) {
-    this.setState({housing: currentItem.type});
-    console.log(currentItem);
+    this.setState({housingLevels: selectedList.slice()});
+    console.log(selectedList);
   }
 
   onYearOfBirthChange(selectedList, currentItem) {
-    this.setState({year: currentItem});
+    this.setState({birthYear: currentItem});
     console.log(currentItem);
   }
 
@@ -432,9 +362,20 @@ class AssignForm extends React.Component {
           }}
         >
           <div className="assign-form-left">
+            <label htmlFor="name"><h4>Name:</h4>
+              <p>
+                Enter the Coach's name.
+              </p>
+              <input
+                type="text"
+                name="name"
+                className="name-input"
+                onChange={this.onNameChange}
+              />
+            </label>
             <label htmlFor="age"><h4>Birth Year:</h4>
               <p>
-                Enter the Member's year of birth.
+                Enter the Coach's year of birth.
               </p>
               <Multiselect
                 options={yearOfBirthList}
@@ -447,9 +388,16 @@ class AssignForm extends React.Component {
                 onRemove={this.onYearOfBirthChange}
               />
             </label>
+            <label><h4>Available?:</h4>
+              Tick the box if the Coach is available:
+              <input
+                name="isAvailable" type="checkbox"
+                checked={this.state.available}
+                onChange={this.onAvailableChange} />
+            </label>
             <label htmlFor="gender"><h4>Gender:</h4>
               <p>
-                Enter the Member's gender.
+                Enter the Coach's gender.
               </p>
               <Multiselect
                 options={["Male", "Female", "Non-binary"]}
@@ -464,7 +412,7 @@ class AssignForm extends React.Component {
             </label>
             <label htmlFor="languages"><h4>Languages:</h4>
               <p>
-                Enter all languages spoken by the Member.
+                Enter all languages spoken by the Coach.
               </p>
               <Multiselect
                 options={["English", "French", "German"]}
@@ -484,59 +432,62 @@ class AssignForm extends React.Component {
               }
             </label>
           </div>
-          <div className="assign-form-submit">
-            <button type="submit">Submit</button>
-          </div>
-          <div className="assign-form-right">
+          <div className="add-form-right">
             <label htmlFor="need"><h4>Level of Need:</h4>
               <p>
-                Enter the Member's level of need.
+                Enter levels of need the Coach has experience with.
               </p>
               <Multiselect
                 options={levelOfNeedOpts}
                 displayValue="desc"
-                closeIcon="cancel"
-                placeholder="Select Level of Need"
-                avoidHighlightFirstOption
-                singleSelect
                 onSelect={this.onNeedChange}
                 onRemove={this.onNeedChange}
+                closeIcon="cancel"
+                placeholder="Select Levels of Need"
+                avoidHighlightFirstOption
+                style={{chips: {background: 'rgba(236, 34, 41, 0.934)'}}}
               />
             </label>
             <label htmlFor="rights"><h4>Rights Status:</h4>
               <p>
-                Enter the Member's rights status.
+                Enter the rights statuses the Coach has experience with.
               </p>
               <Multiselect
                 options={rightsStatusOpts}
                 displayValue="desc"
-                closeIcon="cancel"
-                placeholder="Select Rights Status"
-                avoidHighlightFirstOption
-                singleSelect
                 onSelect={this.onRightsChange}
                 onRemove={this.onRightsChange}
+                closeIcon="cancel"
+                placeholder="Select Rights Statuses"
+                avoidHighlightFirstOption
+                style={{chips: {background: 'rgba(236, 34, 41, 0.934)'}}}
               />
             </label>
             <label htmlFor="housing"><h4>Housing Status:</h4>
               <p>
-                Enter the Member's housing status.
+                Enter the housing statuses the Coach has experience with.
               </p>
               <Multiselect
                 options={housingStatusOpts}
                 displayValue="desc"
-                closeIcon="cancel"
-                placeholder="Select Housing Status"
-                avoidHighlightFirstOption
-                singleSelect
                 onSelect={this.onHousingChange}
                 onRemove={this.onHousingChange}
+                closeIcon="cancel"
+                placeholder="Select Housing Statuses"
+                avoidHighlightFirstOption
+                style={{chips: {background: 'rgba(236, 34, 41, 0.934)'}}}
               />
             </label>
+            <label><h4>Biography:</h4>
+              Enter a short biography about the Coach (optional):
+              <textarea onBlur={this.onBioChange} />
+            </label>
+          </div>
+          <div className="add-form-submit">
+            <button type="submit">Submit</button>
           </div>
         </form>
       </div>
     )
   }
-
 }

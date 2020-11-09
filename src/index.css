@@ -34,7 +34,7 @@ body {
 }
 
 .sidebar-container {
-  min-height: 100vh;
+  min-height: 300vh;
   background-color: rgba(236, 34, 41, 0.934);
   color: rgb(255, 255, 255);
   margin-top: 80px;
@@ -70,6 +70,14 @@ h1 {
 .optionContainer .highlight {
   background: red;
   color: #fff;
+}
+
+.name-input {
+	border:1px solid #c9c9c9;
+	border-radius:4px;
+	height: 14px;
+  width: 446px;
+  padding: 10px;
 }
 
 .assign-keys {
@@ -203,7 +211,7 @@ body.react-confirm-alert-body-element {
   height: 460px;
 }
 
-.assign-form-right {
+.assign-form-right, .add-form-right {
   margin-left: 450px;
   margin-top: -508px;
   padding-left: 50px;
@@ -211,15 +219,39 @@ body.react-confirm-alert-body-element {
   height: 500px;
 }
 
-.assign-form-submit > button {
+.add-form-right {
+  margin-top: -480px;
+}
+
+.proficiency-choice {
+  margin-left: 200px;
+  margin-top: -45px;
+}
+
+.proficiency-label {
+  width: 190px;
+}
+
+.assign-form-submit button, .add-form-submit button {
   outline: none;
   background: rgba(236, 34, 41, 0.934);
   border: none;
   display: inline-block;
   padding: 6px 18px;
   color: #fff;
+  margin-left: 500px;
   margin-right: 10px;
   border-radius: 5px;
   font-size: 12px;
   cursor: pointer;
+}
+
+.add-form-submit button {
+  margin-top: 150px;
+
+}
+
+textarea {
+  width: 450px;
+  height: 100px;
 }

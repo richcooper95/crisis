@@ -296,12 +296,14 @@ async def index(request: sanic.request.Request) -> sanic.response.HTTPResponse:
     return await sanic.response.file("build/index.html")
 
 
-@app.route("/api/v1/coaches", methods=["GET", "POST"])
+@app.route("/api/v1/coaches", methods=["GET", "POST", "OPTIONS"])
 @app.route("/api/v1/coaches/<coach_id:int>", methods=["GET", "POST", "DELETE"])
 async def api_coaches(
     request: sanic.request.Request, coach_id: Optional[int] = None
 ) -> sanic.response.HTTPResponse:
     """HTTP API for 'coaches'."""
+    headers = COMMON_HEADERS
+
     try:
         if request.method == "GET":
             if coach_id is None:
@@ -319,6 +321,13 @@ async def api_coaches(
         elif request.method == "DELETE":
             delete_coach(coach_id)
             response = sanic.response.empty()
+        elif request.method == "OPTIONS":
+            headers = headers.copy()
+            headers.update({
+                "Access-Control-Allow-Methods": "POST, GET, DELETE, OPTIONS",
+                "Access-Control-Allow-Headers": "Content-Type"
+            })
+            response = sanic.response.empty()
         else:
             assert False
     except Exception:
@@ -327,7 +336,7 @@ async def api_coaches(
         )
         response = sanic.response.text("Error processing request", status=400)
 
-    response.headers = sanic.response.Header(COMMON_HEADERS)
+    response.headers = sanic.response.Header(headers)
     return response
 
 
