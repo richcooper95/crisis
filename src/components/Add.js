@@ -388,7 +388,7 @@ class AddForm extends React.Component {
                 onRemove={this.onYearOfBirthChange}
               />
             </label>
-            <label><h4>Available?:</h4>
+            <label><h4>Available:</h4>
               Tick the box if the Coach is available:
               <input
                 name="isAvailable" type="checkbox"
