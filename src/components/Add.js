@@ -142,7 +142,7 @@ class AddForm extends React.Component {
       housingLevels: null,
       rightsLevels: null,
       birthYear: 0,
-      name: null,
+      name: "",
       gender: null,
       available: true,
       bio: null,
