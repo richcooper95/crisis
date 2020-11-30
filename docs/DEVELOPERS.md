@@ -20,7 +20,7 @@ This page contains documentation aimed at developers contributing to the project
 
 ### AWS
 
-The web app is hosted on an EC2 VM on AWS. Charging for this service is per operation time length, which should be very minimal for this app.
+The plan is to use AWS Lambda, details to come.
 
 ## App Design
 
@@ -28,7 +28,7 @@ The high level design is as follows:
 
 1. [Front End](#front-end): A React.js front end which allows the user to interact with the database and assign a Coach to a new Member.
     1. This consists of a single-page application with a sidebar and an 'arena' that changes depending on which sidebar option is selected, and the current state.
-1. [Server](#server): A Python `sanic` server.
+1. [Server](#server): A Python `flask` server.
     1. This serves the web app, and also accepts requests from the web app to e.g. add a Coach to the database.
     1. More details can be found in the [HTTP API](#http-api) section.
 1. [Database](#database): A JSON database.
@@ -53,7 +53,7 @@ This is a simple component consisting of the app title ("Crisis Coach Assignment
 
 ## Server
 
-The server is implemented via the `sanic` Python module. This was chosen since Python is a familiar language, and `sanic` is relatively fast (and had good documentation).
+The server is implemented via the `flask` Python library. This was chosen since Python is a familiar language, and `flask` is a well-known lightweight option that fits well with the deployment plans.
 
 ### HTTP API
 

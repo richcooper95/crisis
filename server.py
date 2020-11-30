@@ -6,19 +6,30 @@ import sys
 from collections import namedtuple
 from typing import Collection, Dict, List, Optional, Tuple, Union
 
-import sanic
-import sanic.request
-import sanic.response
+import flask as flask
 
 logger = logging.getLogger(__name__)
 
-app = sanic.Sanic("hello_example")
+app = flask.Flask("crisis", static_folder="build/", static_url_path="/")
 
-app.static("/", "build/")
 
+JSON = Union[str, int, float, bool, None, List["JSON"], Dict[str, "JSON"]]
 
 # JSON type for coach data.
-CoachJSON = Dict[str, Union[str, int, bool, float, "CoachJSON"]]
+CoachJSON = Dict[str, JSON]
+
+# Flask accepted response return types.
+_FlaskJSON = Dict[str, JSON]
+_FlaskResponse = Union[flask.Response, str, _FlaskJSON]
+_FlaskStatus = int
+_FlaskHeaders = Union[List[str], Dict[str, str]]
+FlaskReturn = Union[
+    _FlaskResponse,
+    Tuple[_FlaskResponse, _FlaskStatus],
+    Tuple[_FlaskResponse, _FlaskHeaders],
+    Tuple[_FlaskResponse, _FlaskStatus, _FlaskHeaders],
+]
+
 
 # ------------------------------------------------------------------------------
 # Database
@@ -292,80 +303,82 @@ COMMON_HEADERS = {"Access-Control-Allow-Origin": "http://localhost:3000"}
 
 
 @app.route("/")
-async def index(request: sanic.request.Request) -> sanic.response.HTTPResponse:
-    return await sanic.response.file("build/index.html")
+def index() -> flask.Response:
+    return app.send_static_file("index.html")
 
 
-@app.route("/api/v1/coaches", methods=["GET", "POST", "OPTIONS"])
-@app.route("/api/v1/coaches/<coach_id:int>", methods=["GET", "POST", "DELETE"])
-async def api_coaches(
-    request: sanic.request.Request, coach_id: Optional[int] = None
-) -> sanic.response.HTTPResponse:
+@app.route("/api/v1/coaches", methods=["GET", "POST"])
+def api_coaches() -> FlaskReturn:
     """HTTP API for 'coaches'."""
-    headers = COMMON_HEADERS
+    headers = COMMON_HEADERS.copy()
 
     try:
-        if request.method == "GET":
-            if coach_id is None:
-                coaches = get_coaches()
-                response = sanic.response.json([c.to_json() for c in coaches])
-            else:
-                coach = get_coach(coach_id)
-                response = sanic.response.json(coach.to_json())
-        elif request.method == "POST":
-            if coach_id is None:
-                coach = create_coach(request.json)
-            else:
-                coach = edit_coach(coach_id, request.json)
-            response = sanic.response.json(coach.to_json())
-        elif request.method == "DELETE":
-            delete_coach(coach_id)
-            response = sanic.response.empty()
-        elif request.method == "OPTIONS":
-            headers = headers.copy()
-            headers.update({
-                "Access-Control-Allow-Methods": "POST, GET, DELETE, OPTIONS",
-                "Access-Control-Allow-Headers": "Content-Type"
-            })
-            response = sanic.response.empty()
+        if flask.request.method == "GET":
+            coaches = get_coaches()
+            response = flask.jsonify([c.to_json() for c in coaches])
+        elif flask.request.method == "POST":
+            coach = create_coach(flask.request.json)
+            response = flask.jsonify(coach.to_json())
         else:
-            assert False
+            assert False, "Unsupported method"
     except Exception:
-        logger.exception(
-            "Unexpected exception on %s route", request.path, exc_info=True
-        )
-        response = sanic.response.text("Error processing request", status=400)
+        logger.exception("Unexpected exception on %s route", flask.request.path)
+        raise
 
-    response.headers = sanic.response.Header(headers)
+    response = flask.make_response(response)
+    response.headers.update(headers)
+    return response
+
+
+@app.route("/api/v1/coaches/<int:coach_id>", methods=["GET", "POST", "DELETE"])
+def api_coaches_id(coach_id: int) -> FlaskReturn:
+    """HTTP API for 'coaches' with ID given."""
+    headers = COMMON_HEADERS.copy()
+
+    try:
+        if flask.request.method == "GET":
+            coach = get_coach(coach_id)
+            response = flask.jsonify(coach.to_json())
+        elif flask.request.method == "POST":
+            coach = edit_coach(coach_id, flask.request.json)
+            response = flask.jsonify(coach.to_json())
+        elif flask.request.method == "DELETE":
+            delete_coach(coach_id)
+            response = ""
+        else:
+            assert False, "Unsupported method"
+    except Exception:
+        logger.exception("Unexpected exception on %s route", flask.request.path)
+        raise
+
+    response = flask.make_response(response)
+    response.headers.update(headers)
     return response
 
 
 @app.route("/api/v1/coach-matches", methods=["GET"])
-async def api_coach_matches(
-    request: sanic.request.Request,
-) -> sanic.response.HTTPResponse:
+def api_coach_matches() -> FlaskReturn:
     """HTTP API for 'coach-matches'."""
     try:
-        args = {k: v[0] for k, v in request.args.items()}
+        args = dict(**flask.request.args)
         for int_arg in ["birth_year", "need", "rights", "housing"]:
             if int_arg in args:
                 args[int_arg] = int(args[int_arg])
         if "languages" in args:
             args["languages"] = _parse_languages(args["languages"])
         coach_matches = get_coach_matches(args)
-        response = sanic.response.json(
+        response = flask.jsonify(
             [
                 {**coach.to_json(), "match_score": score}
                 for score, coach in coach_matches
             ]
         )
     except Exception:
-        logger.exception(
-            "Unexpected exception on %s route", request.path, exc_info=True
-        )
-        response = sanic.response.text("Error processing request", status=400)
+        logger.exception("Unexpected exception on %s route", flask.request.path)
+        raise
 
-    response.headers = sanic.response.Header(COMMON_HEADERS)
+    response = flask.make_response(response)
+    response.headers.update(COMMON_HEADERS)
     return response
 
 
@@ -392,6 +405,7 @@ def main(argv: List[str]):
 
     if args.dev:
         port = 8000
+        os.environ["FLASK_ENV"] = "development"
     else:
         port = 80
     app.run(host="0.0.0.0", port=port)
