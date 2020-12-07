@@ -1,6 +1,5 @@
 import argparse
 import json
-import logging
 import os
 import sys
 from collections import namedtuple
@@ -8,9 +7,8 @@ from typing import Collection, Dict, List, Optional, Tuple, Union
 
 import flask as flask
 
-logger = logging.getLogger(__name__)
-
 app = flask.Flask("crisis", static_folder="build/", static_url_path="/")
+logger = app.logger
 
 
 JSON = Union[str, int, float, bool, None, List["JSON"], Dict[str, "JSON"]]
@@ -390,7 +388,6 @@ def api_coach_matches() -> FlaskReturn:
 def parse_args(argv: List[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--dev", action="store_true", help="Run in developer mode")
-    parser.add_argument("--debug", action="store_true", help="Turn on debug logging")
     return parser.parse_args(argv)
 
 
@@ -398,8 +395,6 @@ def main(argv: List[str]):
     global coach_db
 
     args = parse_args(argv)
-
-    logging.basicConfig(level=logging.DEBUG if args.debug else logging.INFO)
 
     coach_db = CoachDB(COACH_DB_FILE)
 
