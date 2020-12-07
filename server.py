@@ -297,9 +297,6 @@ def get_coach_matches(data: CoachJSON) -> List[Tuple[int, Coach]]:
 # ------------------------------------------------------------------------------
 
 
-COMMON_HEADERS = {"Access-Control-Allow-Origin": "http://localhost:3000"}
-
-
 @app.route("/")
 def index() -> flask.Response:
     return app.send_static_file("index.html")
@@ -308,8 +305,6 @@ def index() -> flask.Response:
 @app.route("/api/v1/coaches", methods=["GET", "POST"])
 def api_coaches() -> FlaskReturn:
     """HTTP API for 'coaches'."""
-    headers = COMMON_HEADERS.copy()
-
     try:
         if flask.request.method == "GET":
             coaches = get_coaches()
@@ -323,16 +318,12 @@ def api_coaches() -> FlaskReturn:
         logger.exception("Unexpected exception on %s route", flask.request.path)
         raise
 
-    response = flask.make_response(response)
-    response.headers.update(headers)
     return response
 
 
 @app.route("/api/v1/coaches/<int:coach_id>", methods=["GET", "POST", "DELETE"])
 def api_coaches_id(coach_id: int) -> FlaskReturn:
     """HTTP API for 'coaches' with ID given."""
-    headers = COMMON_HEADERS.copy()
-
     try:
         if flask.request.method == "GET":
             coach = get_coach(coach_id)
@@ -349,8 +340,6 @@ def api_coaches_id(coach_id: int) -> FlaskReturn:
         logger.exception("Unexpected exception on %s route", flask.request.path)
         raise
 
-    response = flask.make_response(response)
-    response.headers.update(headers)
     return response
 
 
@@ -375,8 +364,6 @@ def api_coach_matches() -> FlaskReturn:
         logger.exception("Unexpected exception on %s route", flask.request.path)
         raise
 
-    response = flask.make_response(response)
-    response.headers.update(COMMON_HEADERS)
     return response
 
 
@@ -399,8 +386,11 @@ def main(argv: List[str]):
     coach_db = CoachDB(COACH_DB_FILE)
 
     if args.dev:
+        import flask_cors
+
         port = 8000
         os.environ["FLASK_ENV"] = "development"
+        flask_cors.CORS(app, origins=["http://localhost:3000"])
     else:
         port = 80
     app.run(host="0.0.0.0", port=port)
