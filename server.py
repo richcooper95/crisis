@@ -134,7 +134,7 @@ class CoachDB:
         db_coach = Coach(**{**coach.to_json(), "id": self._next_id})
         self._next_id += 1
         self._db[db_coach.id] = db_coach
-        logger.debug("Added coach with ID %d", coach.id)
+        logger.debug("Added coach with ID %d", db_coach.id)
         if self._auto_persist:
             self.persist(self._file)
         return db_coach
