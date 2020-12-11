@@ -1,0 +1,10 @@
+{
+    "dev": {
+        "app_function": "server.app",
+        "profile_name": "crisis-deploy",
+        "project_name": "crisis",
+        "runtime": "python3.8",
+        "s3_bucket": "zappa-yzf0edbqq",
+        "aws_region": "eu-west-2"
+    }
+}
