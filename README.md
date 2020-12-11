@@ -14,19 +14,23 @@ These instructions assume the development environment is Ubuntu on Windows Subsy
 
 1. Install nodejs and NPM using [these instructions](https://tecadmin.net/install-latest-nodejs-npm-on-ubuntu/).
 1. Install the Yarn package manager using the instructions that appear near the end of the output of the previous step.
-1. Clone this repository and run `yarn install` from the root directory of your clone.
+1. Clone this repository.
+1. Run `yarn install` from the root directory of your clone.
+1. And `source .venv/bin/activate`
+1. And finally `pip3 install -r requirements.txt`
 
-## Available Scripts
+## Run The App
+
+The following two commands launch a local development instance of the app. Use two separate shells or launch the first command in the background.
+
+1. `flask run`
+2. `yarn start`
+
+The second command should open [http://localhost:3000](http://localhost:3000) in your browser. The page will automatically reload if you make edits. You will also see any lint errors in the console.
+
+## Other Commands
 
 In the project directory, you can run:
-
-### `yarn start`
-
-Runs the app in the development mode.<br />
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
-
-The page will reload if you make edits.<br />
-You will also see any lint errors in the console.
 
 ### `yarn test`
 
