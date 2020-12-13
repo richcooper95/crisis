@@ -5,6 +5,10 @@
         "project_name": "crisis",
         "runtime": "python3.8",
         "s3_bucket": "zappa-yzf0edbqq",
-        "aws_region": "eu-west-2"
+        "aws_region": "eu-west-2",
+        "keep_warm": false,
+        "exclude": [
+            "node_modules"
+        ]
     }
 }

@@ -15,7 +15,7 @@ app = flask.Flask("crisis", static_folder="build/", static_url_path="/")
 logger = app.logger
 
 # In development mode, allow access from the Yarn-hosted frontend.
-if os.environ["FLASK_ENV"] == "development":
+if os.environ.get("FLASK_ENV") == "development":
     import flask_cors
     flask_cors.CORS(app, origins=["http://localhost:3000"])
 

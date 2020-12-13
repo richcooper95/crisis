@@ -1,10 +1,4 @@
-click==7.1.2
+zappa==0.52.0
 Flask==1.1.2
 Flask-Cors==3.0.9
-itsdangerous==1.1.0
-Jinja2==2.11.2
-MarkupSafe==1.1.1
-six==1.15.0
-Werkzeug==1.0.1
 python-dotenv==0.15.0
-zappa==0.52.0
