@@ -206,12 +206,12 @@ body.react-confirm-alert-body-element {
   }
 }
 
-.assign-form-left {
+.assign-form-left, .add-form-left, .edit-form-left {
   width: 450px;
   height: 460px;
 }
 
-.assign-form-right, .add-form-right {
+.assign-form-right, .add-form-right, .edit-form-right {
   margin-left: 450px;
   margin-top: -508px;
   padding-left: 50px;
@@ -219,8 +219,9 @@ body.react-confirm-alert-body-element {
   height: 500px;
 }
 
-.add-form-right {
+.add-form-right, .edit-form-right {
   margin-top: -480px;
+  display: inline-block;
 }
 
 .proficiency-choice {
@@ -232,7 +233,7 @@ body.react-confirm-alert-body-element {
   width: 190px;
 }
 
-.assign-form-submit button, .add-form-submit button {
+.assign-form-submit button, .add-form-submit button, .edit-form-submit button{
   outline: none;
   background: rgba(236, 34, 41, 0.934);
   border: none;
@@ -246,9 +247,8 @@ body.react-confirm-alert-body-element {
   cursor: pointer;
 }
 
-.add-form-submit button {
-  margin-top: 150px;
-
+.add-form-submit button, .edit-form-submit button {
+  margin-top: 15px;
 }
 
 textarea {
