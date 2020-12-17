@@ -1,6 +1,5 @@
 import json
 import os
-import sys
 from collections import namedtuple
 from typing import Collection, Dict, List, Optional, Tuple, Union
 
@@ -17,6 +16,7 @@ logger = app.logger
 # In development mode, allow access from the Yarn-hosted frontend.
 if os.environ.get("FLASK_ENV") == "development":
     import flask_cors
+
     flask_cors.CORS(app, origins=["http://localhost:3000"])
 
 
