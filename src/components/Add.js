@@ -1,8 +1,6 @@
 import React from "react";
-import Loader from "react-loader-spinner";
-import { BlankForm } from "./Forms";
-//import 'react-confirm-alert/src/react-confirm-alert.css';
 
+import { BlankForm } from "./Forms";
 import * as cmn from "../cmn.js";
 
 const displays = {
@@ -20,6 +18,7 @@ export default class Add extends React.Component {
   }
 
   handleSubmitConfirm(form_data) {
+
     console.log("Confirmed form: " + JSON.stringify(form_data));
     this.setState({ display: displays.LOADING });
 
@@ -63,7 +62,7 @@ export default class Add extends React.Component {
         break;
 
       case displays.LOADING:
-        display = <AddLoader />;
+        display = <cmn.LoaderDisplay />;
         break;
 
       default:
@@ -73,23 +72,6 @@ export default class Add extends React.Component {
 
     return display;
   }
-}
-
-function AddLoader(props) {
-  return (
-    // @@@ This doesn't seem to justify the spinner in the centre...
-    <div
-      style={{
-        width: "100vw",
-        height: "100vh",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-      }}
-    >
-      <Loader type="TailSpin" color="#EC2229" height={80} width={80} />
-    </div>
-  );
 }
 
 /* 

@@ -1,92 +1,17 @@
 import React from "react";
 import { Multiselect } from "multiselect-react-dropdown";
+import DataTable from "react-data-table-component";
+import { confirmAlert } from "react-confirm-alert";
+
 import { CoachForm, BlankForm } from "./Forms";
-// import { useTable } from 'react-table';
-
-const levelOfNeedOpts = [
-  { type: 1, desc: "1 - No intervention necessary" },
-  { type: 2, desc: "2 - Signpost to other resources" },
-  { type: 3, desc: "3 - Information, advice and guidance (IAG)" },
-  { type: 4, desc: "4 - Coaching and skills" },
-  { type: 5, desc: "5 - Coaching engagement skills" },
-  { type: 6, desc: "6 - Intensive support needed" },
-];
-
-const rightsStatusOpts = [
-  { type: 1, desc: "1 - No intervention necessary" },
-  { type: 2, desc: "2 - No recourse to public funds" },
-];
-
-const housingStatusOpts = [
-  { type: 1, desc: "1 - No intervention necessary" },
-  { type: 2, desc: "2 - At risk" },
-  { type: 3, desc: "3 - Unsuitable temporary accommodation" },
-  { type: 4, desc: "4 - Rough sleeping" },
-];
+import * as cmn from "../cmn.js";
 
 const displays = {
-  DELETE: "delete",
   EDIT: "edit",
   LOADING: "loading",
   SEARCH: "search",
   TABLE: "table",
 };
-
-/**
- * Capitalise the first letting of str.
- *
- * @param {String} str String to capitalise the first letter of.
- */
-function capitalise(str) {
-  return str.charAt(0).toUpperCase() + str.slice(1);
-}
-
-/**
- * Obtain all entries in database.
- */
-function get_coaches() {
-  fetch("http://localhost:8000/api/v1/coaches/", {
-    method: "GET",
-  })
-    .then((response) => {
-      if (!response.ok) {
-        console.error(
-          "Failed to get all coaches, got response code: " + response.status
-        );
-        response.text().then((text) => alert(`An error occured: ${text}`));
-      } else {
-        return response.body;
-      }
-    })
-    .catch((error) => {
-      console.error("There was a problem: " + error);
-      alert(`An error occured: ${error}`);
-    });
-}
-
-/**
- * Obtain entry for coach_id
- */
-function get_coach(coach_id) {
-  fetch("http://localhost:8000/api/v1/coaches/" + coach_id, {
-    method: "GET",
-  })
-    .then((response) => {
-      if (!response.ok) {
-        console.error(
-          "Failed to get coaches information, got response code: " +
-            response.status
-        );
-        response.text().then((text) => alert(`An error occured: ${text}`));
-      } else {
-        return response.json();
-      }
-    })
-    .catch((error) => {
-      console.error("There was a problem: " + error);
-      alert(`An error occured: ${error}`);
-    });
-}
 
 /*
  * Class defines edit page.
@@ -94,94 +19,156 @@ function get_coach(coach_id) {
 export default class Edit extends React.Component {
   constructor(props) {
     super(props);
-    this.handleDeleteConfirm = this.handleDeleteConfirm.bind(this);
+
+    /*
+     * Bind functions to class.
+     */
+    this.handleEditRequest = this.handleEditRequest.bind(this);
+    this.handleEditCancel = this.handleEditCancel.bind(this);
     this.handleEditConfirm = this.handleEditConfirm.bind(this);
+    this.handleDeleteConfirm = this.handleDeleteConfirm.bind(this);
     this.handleSearchConfirm = this.handleSearchConfirm.bind(this);
+    this.handleTableCancel = this.handleTableCancel.bind(this);
+
+    /*
+     * Set starting state to search.
+     */
     this.state = {
       display: displays.SEARCH,
     };
   }
 
   /**
-   * Delete a coach from the database.
+   * Handle the user selecting to edit the coach with coachID from the table.
    *
-   * @param {Number} coach_id The ID of the coach to remove.
+   * @param {Number} coachID The ID of the coach to edit.
    */
-  handleDeleteConfirm(coach_id) {
-    console.log("Confirmed delete" + coach_id);
-    this.setState({ display: displays.LOADING });
-
-    // Hardcode to localhost:8000 for development mode.
-    fetch("http://localhost:8000/api/v1/coaches/" + coach_id, {
-      method: "DELETE",
-    })
-      .then((response) => {
-        if (!response.ok) {
-          console.error(
-            "Failed to submit, got response code: " + response.status
-          );
-          response.text().then((text) => alert(`An error occured: ${text}`));
-        } else {
-          console.log(
-            "Successfully submitted with response: " + response.status
-          );
-          alert(`Coach was successfully deleted`);
-        }
-        this.setState({ display: displays.TABLE });
-      })
-      .catch((error) => {
-        console.error("There was a problem: " + error);
-        alert(`An error occured: ${error}`);
-        this.setState({ display: displays.FORM });
-      });
+  handleEditRequest(coachID) {
+    // Set to edit display with correct values.
+    // Save coachID as this.state.editID
+    this.setState({ editID: coachID });
+    this.setState({ display: displays.EDIT });
   }
 
   /**
-   * Edit an existing coach.
+   * Cancel the edit request and return to the table.
+   */
+  handleEditCancel() {
+    console.log("Cancelling edit");
+    this.setState({ display: displays.TABLE });
+  }
+
+  /**
+   * UNFINISHED
    *
-   * @param {Number} coach_id  The ID of the coach to edit.
+   * Edit an existing coach, then set display to the TABLE showing all searched
+   * for coaches.
+   *
+   * @param {Number} coachID The ID of the coach to edit.
    * @param {Object} form_data The updated form data for the coach.
    */
-  handleEditConfirm(coach_id, form_data) {
+  handleEditConfirm(form_data) {
+    // Update db entry for form_data.coachID
+    // Set to table display
+    // Save all coaches as this.state.tableData
+    alert(JSON.stringify(form_data));
+
     console.log("Confirmed form: " + JSON.stringify(form_data));
     this.setState({ display: displays.LOADING });
 
-    // Hardcode to localhost:8000 for development mode.
-    fetch("http://localhost:8000/api/v1/coaches/" + coach_id, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form_data),
-    })
-      .then((response) => {
-        if (!response.ok) {
-          console.error(
-            "Failed to submit, got response code: " + response.status
-          );
-          response.text().then((text) => alert(`An error occured: ${text}`));
-        } else {
-          console.log(
-            "Successfully submitted with response: " + response.status
-          );
-          alert(`Coach ${form_data.name} was successfully updated`);
-        }
-        this.setState({ display: displays.FORM });
-      })
-      .catch((error) => {
-        console.error("There was a problem: " + error);
-        alert(`An error occured: ${error}`);
-        this.setState({ display: displays.FORM });
-      });
+    this.setState({ display: displays.TABLE });
   }
 
   /**
-   * Search for all coaches matching form_data.
+   * UNFINISHED
+   *
+   * Remove a coach from the table
+   *
+   * @param coachID  the coach to remove from the table
+   */
+  removeCoachFromTable(coachID) {
+    alert(`removed coach ${coachID} from the table`);
+  }
+
+  /**
+   * UNFINISHED
+   *
+   * Delete a coach from the database and return display to the table.
+   *
+   * @param {Number} coachID The ID of the coach to remove.
+   */
+  handleDeleteConfirm(coachID) {
+    // Remove coachID from db
+    // Set to table display
+    alert(`deleted coach ${coachID}`);
+
+    console.log("Confirmed delete" + coachID);
+    this.setState({ display: displays.LOADING });
+
+    /*
+     * Remove coach from table so coach isn't deleted/editted.
+     */
+    this.removeCoachFromTable(coachID);
+    this.setState({ display: displays.TABLE });
+  }
+
+  /**
+   * UNFINISHED
+   *
+   * Search for all coaches matching form_data and set display to table
    *
    * @param {Object} form_data The updated form data for the coach.
    */
   handleSearchConfirm(form_data) {
-    // Poll server for all forms matching data.
-    // Set to table display with correct values.
-    console.error("Not defined yet");
+    // Poll server for all coaches matching data.
+    // Set to table display
+    // Save all coaches as this.state.tableData
+    alert(JSON.stringify(form_data));
+
+    console.log("Confirmed form: " + JSON.stringify(form_data));
+    this.setState({ display: displays.LOADING });
+
+    // @@@ Remove when properly implemented
+    this.setState({
+      tableData: [
+        {
+          coachID: 9999,
+          birth_year: 1000,
+          name: "hello",
+          gender: "Male",
+          available: true,
+          bio: "pii",
+          languages: {
+            english: { type: 1, desc: "1 - Good" },
+            french: { type: 2, desc: "2 - Good" },
+          },
+          need: [
+            { type: 1, desc: "1 - No intervention necessary" },
+            { type: 2, desc: "2 - No recourse to public funds" },
+          ],
+          rights: [
+            { type: 1, desc: "1 - No intervention necessary" },
+            { type: 2, desc: "2 - No recourse to public funds" },
+          ],
+          housing: [
+            { type: 1, desc: "1 - No intervention necessary" },
+            { type: 2, desc: "2 - At risk" },
+            { type: 3, desc: "3 - Unsuitable temporary accommodation" },
+            { type: 4, desc: "4 - Rough sleeping" },
+          ],
+        },
+      ],
+    });
+
+    this.setState({ display: displays.TABLE });
+  }
+
+  /**
+   * Cancel a search and return to the search form.
+   */
+  handleTableCancel() {
+    console.log("Cancelling search, returning to search form");
+    this.setState({ display: displays.SEARCH });
   }
 
   /**
@@ -191,29 +178,34 @@ export default class Edit extends React.Component {
     var display = null;
 
     switch (this.state.display) {
-      case displays.DELETE:
-        // display = (
-        //   <DeleteConfirmation handleDeleteConfirm={this.handleDeleteConfirm} />
-        // );
-        display = "delete";
-        break;
-
       case displays.EDIT:
-        display = <EditForm handleEditConfirm={this.handleEditConfirm} />;
+        display = (
+          <EditForm
+            handleEditCancel={this.handleEditCancel}
+            handleSubmitConfirm={this.handleEditConfirm}
+            editID={this.state.editID}
+          />
+        );
         break;
 
       case displays.LOADING:
-        display = <Loader />;
-        break;
-
-      case displays.TABLE:
-        // display = <CoachesTable />;
-        display = "foo";
+        display = <cmn.LoaderDisplay />;
         break;
 
       case displays.SEACH:
       default:
-        display = <SearchForm handleEditConfirm={this.handleSearchConfirm} />;
+        display = <SearchForm handleSubmitConfirm={this.handleSearchConfirm} />;
+        break;
+
+      case displays.TABLE:
+        display = (
+          <CoachesTable
+            handleDeleteConfirm={this.handleDeleteConfirm}
+            handleEditRequest={this.handleEditRequest}
+            handleTableCancel={this.handleTableCancel}
+            tableData={this.state.tableData}
+          />
+        );
         break;
     }
 
@@ -222,62 +214,56 @@ export default class Edit extends React.Component {
 }
 
 /**
- * Return loader for spinner.
- */
-function Loader(props) {
-  return (
-    // @@@ This doesn't seem to justify the spinner in the centre...
-    <div
-      style={{
-        width: "100vw",
-        height: "100vh",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-      }}
-    >
-      <Loader type="TailSpin" color="#EC2229" height={80} width={80} />
-    </div>
-  );
-}
-
-/**
  * Defines a form that allows users to edit a coach entry.
  */
 class EditForm extends CoachForm {
-  constructor(props, coach_id) {
+  constructor(props) {
     super(props);
 
     /*
      * Set submit function - inheritted from base class.
      */
     this.onSubmit = this.handleSubmitFullForm;
+    this.onCancel = this.props.handleEditCancel;
 
     /**
      * Set the starting state to the current coach information.
-     *
-     * @@@ set to get_coach() once working.
      */
-    this.state = {
-      coach_id: coach_id,
-      birthYear: 1000,
+    this.state = this.getCoach(this.props.editID);
+  }
+
+  /**
+   * UNFINISHED
+   *
+   * Obtain entry for coachID
+   *
+   * Doesn't work.
+   */
+  getCoach(coachID) {
+    // Poll server data for coachID
+    alert(`Loading data for coach ID ${coachID}`);
+
+    // @@@ remove when implemented
+    return {
+      coachID: coachID,
+      birth_year: 1000,
       name: "hello",
       gender: "Male",
       available: true,
       bio: "pii",
       languages: {
-        english: { type: 1, desc: "1 - Good" },
-        french: { type: 2, desc: "2 - Good" },
+        english: 1,
+        french: 2,
       },
-      needLevels: [
+      need: [
         { type: 1, desc: "1 - No intervention necessary" },
         { type: 2, desc: "2 - No recourse to public funds" },
       ],
-      rightsLevels: [
+      rights: [
         { type: 1, desc: "1 - No intervention necessary" },
         { type: 2, desc: "2 - No recourse to public funds" },
       ],
-      housingLevels: [
+      housing: [
         { type: 1, desc: "1 - No intervention necessary" },
         { type: 2, desc: "2 - At risk" },
         { type: 3, desc: "3 - Unsuitable temporary accommodation" },
@@ -286,7 +272,7 @@ class EditForm extends CoachForm {
     };
   }
 
-  /*
+  /**
    * Return HTML for the edit form with values pre-filled.
    *
    * Call this.onSubmit on form submission.
@@ -329,7 +315,7 @@ class EditForm extends CoachForm {
                 options={yearOfBirthList}
                 isObject={false}
                 closeIcon="cancel"
-                selectedValues={[this.state.birthYear]}
+                selectedValues={[this.state.birth_year]}
                 avoidHighlightFirstOption
                 singleSelect
                 onSelect={this.onYearOfBirthChange}
@@ -355,7 +341,7 @@ class EditForm extends CoachForm {
                 options={["Male", "Female", "Non-binary"]}
                 isObject={false}
                 closeIcon="cancel"
-                selectedValues={[capitalise(this.state.gender)]}
+                selectedValues={[cmn.capitalise(this.state.gender)]}
                 avoidHighlightFirstOption
                 singleSelect
                 onSelect={this.onGenderChange}
@@ -373,7 +359,7 @@ class EditForm extends CoachForm {
                 onRemove={this.onLanguagesRemove}
                 closeIcon="cancel"
                 selectedValues={Object.keys(this.state.languages).map(
-                  capitalise
+                  cmn.capitalise
                 )}
                 avoidHighlightFirstOption
                 style={{ chips: { background: "rgba(236, 34, 41, 0.934)" } }}
@@ -397,12 +383,12 @@ class EditForm extends CoachForm {
               <h4>Level of Need:</h4>
               <p>Enter levels of need the Coach has experience with.</p>
               <Multiselect
-                options={levelOfNeedOpts}
+                options={cmn.levelOfNeedOpts}
                 displayValue="desc"
                 onSelect={this.onNeedChange}
                 onRemove={this.onNeedChange}
                 closeIcon="cancel"
-                selectedValues={this.state.needLevels}
+                selectedValues={this.state.need}
                 avoidHighlightFirstOption
                 style={{ chips: { background: "rgba(236, 34, 41, 0.934)" } }}
               />
@@ -412,12 +398,12 @@ class EditForm extends CoachForm {
               <h4>Rights Status:</h4>
               <p>Enter the rights statuses the Coach has experience with.</p>
               <Multiselect
-                options={rightsStatusOpts}
+                options={cmn.rightsStatusOpts}
                 displayValue="desc"
                 onSelect={this.onRightsChange}
                 onRemove={this.onRightsChange}
                 closeIcon="cancel"
-                selectedValues={this.state.rightsLevels}
+                selectedValues={this.state.rights}
                 avoidHighlightFirstOption
                 style={{ chips: { background: "rgba(236, 34, 41, 0.934)" } }}
               />
@@ -427,12 +413,12 @@ class EditForm extends CoachForm {
               <h4>Housing Status:</h4>
               <p>Enter the housing statuses the Coach has experience with.</p>
               <Multiselect
-                options={housingStatusOpts}
+                options={cmn.housingStatusOpts}
                 displayValue="desc"
                 onSelect={this.onHousingChange}
                 onRemove={this.onHousingChange}
                 closeIcon="cancel"
-                selectedValues={this.state.housingLevels}
+                selectedValues={this.state.housing}
                 avoidHighlightFirstOption
                 style={{ chips: { background: "rgba(236, 34, 41, 0.934)" } }}
               />
@@ -450,7 +436,9 @@ class EditForm extends CoachForm {
           </div>
 
           <div className="edit-form-cancel">
-            <button type="cancel">Cancel</button>
+            <button type="cancel" onClick={this.onCancel}>
+              Cancel
+            </button>
           </div>
         </form>
       </div>
@@ -466,5 +454,147 @@ class SearchForm extends BlankForm {
   constructor(props) {
     super(props);
     this.onSubmit = this.handleSubmitPartialForm;
+  }
+}
+
+/*
+ * Defines a table that displays all the coaches matching the search filter.
+ */
+class CoachesTable extends React.Component {
+  /**
+   * Return names and accessors of columns for the table.
+   */
+  getColumns() {
+    return [
+      {
+        name: "Name",
+        selector: "name",
+      },
+      {
+        name: "Birth Year",
+        selector: "birth_year",
+      },
+      {
+        name: "Gender",
+        selector: "gender",
+      },
+      {
+        name: "Available",
+        selector: "available",
+      },
+      {
+        name: "Edit",
+        selector: "editButton",
+      },
+      {
+        name: "Delete",
+        selector: "deteleButton",
+      },
+    ];
+  }
+
+  /**
+   * Return delete confirmation message
+   *
+   * @param coachID the ID of the coach to delete
+   */
+  getDeleteConfirmationMessage(coachID) {
+    return `Are you sure you want to delete coach ${coachID} from the database?`;
+  }
+
+  /**
+   * Display confirm alert for deleting the coach from the db
+   *
+   * @param coachID the ID of the coach to delete
+   */
+  getDeleteConfirmCheck(coachID) {
+    confirmAlert({
+      title: "Confirm Coach Details",
+      message: this.getDeleteConfirmationMessage(coachID),
+      buttons: [
+        {
+          label: "Confirm",
+          onClick: () => {
+            this.props.handleDeleteConfirm(coachID);
+          },
+        },
+        {
+          label: "Go back",
+        },
+      ],
+    });
+  }
+
+  /**
+   * Return a button that, on click, loads the edit page for coachID.
+   */
+  getEditButton(coachID) {
+    return (
+      <div className="search-table-edit">
+        <button onClick={() => this.props.handleEditRequest(coachID)}>
+          Edit
+        </button>
+      </div>
+    );
+  }
+
+  /**
+   * Return a button that, on click, initiates the delete process for coachID
+   */
+  getDeleteButton(coachID) {
+    return (
+      <div className="search-table-delete">
+        <button onClick={() => this.getDeleteConfirmCheck(coachID)}>
+          Delete
+        </button>
+      </div>
+    );
+  }
+
+  /**
+   * Return a single row of a table with coachDetails entered
+   */
+  formatCoach(coachDetails) {
+    return {
+      name: coachDetails.name,
+      birth_year: coachDetails.birth_year,
+      gender: coachDetails.gender,
+      available: coachDetails.available ? "true" : "false",
+      editButton: this.getEditButton(coachDetails.coachID),
+      deteleButton: this.getDeleteButton(coachDetails.coachID),
+    };
+  }
+
+  /**
+   * Return the data for the table.
+   *
+   * Return tableData formatted to only include name, age, gender and
+   * availability.
+   */
+  getData() {
+    return this.props.tableData.map(this.formatCoach, this);
+  }
+
+  /**
+   * Return HTML for a table listing the name, age, gender and availability of
+   * the coach, along with buttons to edit and delete the entry.
+   */
+  render() {
+    const columns = this.getColumns();
+    const data = this.getData();
+    console.log(columns);
+    console.log(data);
+    return (
+      <div>
+        <div className="search-table-display">
+          <DataTable title="Coaches" columns={columns} data={data} />
+        </div>
+        <div className="search-table-cancel">
+          <button onClick={this.props.handleTableCancel}>
+            Return to search
+          </button>
+        </div>
+      </div>
+    );
   }
 }

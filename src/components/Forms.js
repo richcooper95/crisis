@@ -2,39 +2,10 @@ import React from "react";
 import { Multiselect } from "multiselect-react-dropdown";
 import { confirmAlert } from "react-confirm-alert";
 
-const langProficiencyOpts = [
-  { type: 1, desc: "1 - Good" },
-  { type: 2, desc: "2 - Bad" },
-  { type: 3, desc: "3 - Ugly" },
-];
-
-const levelOfNeedOpts = [
-  { type: 1, desc: "1 - No intervention necessary" },
-  { type: 2, desc: "2 - Signpost to other resources" },
-  { type: 3, desc: "3 - Information, advice and guidance (IAG)" },
-  { type: 4, desc: "4 - Coaching and skills" },
-  { type: 5, desc: "5 - Coaching engagement skills" },
-  { type: 6, desc: "6 - Intensive support needed" },
-];
-
-const rightsStatusOpts = [
-  { type: 1, desc: "1 - No intervention necessary" },
-  { type: 2, desc: "2 - No recourse to public funds" },
-];
-
-const housingStatusOpts = [
-  { type: 1, desc: "1 - No intervention necessary" },
-  { type: 2, desc: "2 - At risk" },
-  { type: 3, desc: "3 - Unsuitable temporary accommodation" },
-  { type: 4, desc: "4 - Rough sleeping" },
-];
-
-function capitalise(str) {
-  return str.charAt(0).toUpperCase() + str.slice(1);
-}
+import * as cmn from "../cmn.js";
 
 /*
- * Defines a form that can be used for accessing coaches.
+ * Defines a form base class that can be used for accessing coaches.
  */
 export class CoachForm extends React.Component {
   constructor(props) {
@@ -61,10 +32,10 @@ export class CoachForm extends React.Component {
      */
     this.state = {
       languages: {},
-      needLevels: null,
-      housingLevels: null,
-      rightsLevels: null,
-      birthYear: 0,
+      need: null,
+      housing: null,
+      rights: null,
+      birth_year: 0,
       name: "",
       gender: null,
       available: null,
@@ -83,25 +54,32 @@ export class CoachForm extends React.Component {
         /*
          * If the proficiency already been entered, display this.
          */
-        if (
-          this.state.languages[language] !== null &&
-          this.state.languages[language].hasOwnProperty("desc")
-        ) {
+        if (this.state.languages[language] !== null) {
+          /*
+           * Get text for language proficiency
+           */
+          for (const proficiencyText of cmn.langProficiencyOpts) {
+            if (this.state.languages[language] === proficiencyText.type) {
+              var displayText = proficiencyText;
+            }
+          }
+          console.log(`Proficiency for ${language} is ${displayText.desc}`);
+
           /*
            * Add proficiency level selecton.
            */
           languageFragments.push(
             <div key={language}>
               <div className="proficiency-label">
-                <p style={{ textAlign: "left" }}>{capitalise(language)}:</p>
+                <p style={{ textAlign: "left" }}>{cmn.capitalise(language)}:</p>
               </div>
 
               <div className="proficiency-choice">
                 <Multiselect
-                  options={langProficiencyOpts}
+                  options={cmn.langProficiencyOpts}
                   displayValue="desc"
                   closeIcon="cancel"
-                  selectedValues={[this.state.languages[language]]}
+                  selectedValues={[displayText]}
                   avoidHighlightFirstOption
                   singleSelect
                   onSelect={this.onProficiencyChange.bind(this, language)}
@@ -114,18 +92,19 @@ export class CoachForm extends React.Component {
            * Else display a placeholder "Select Proficiency"
            */
         } else {
+          console.log(`Proficiency for ${language} is unset`);
           /*
            * Add proficiency level selecton.
            */
           languageFragments.push(
             <div key={language}>
               <div className="proficiency-label">
-                <p style={{ textAlign: "left" }}>{capitalise(language)}:</p>
+                <p style={{ textAlign: "left" }}>{cmn.capitalise(language)}:</p>
               </div>
 
               <div className="proficiency-choice">
                 <Multiselect
-                  options={langProficiencyOpts}
+                  options={cmn.langProficiencyOpts}
                   displayValue="desc"
                   closeIcon="cancel"
                   placeholder="Select Proficiency"
@@ -143,16 +122,9 @@ export class CoachForm extends React.Component {
     return languageFragments;
   }
 
-  getLanguagesDisplay() {
-    var languages_str = "";
-
-    Object.entries(this.state.languages).forEach((entry) => {
-      languages_str += capitalise(entry[0]) + " (" + entry[1] + ")\n";
-    });
-
-    return languages_str;
-  }
-
+  /**
+   * Get display for the expliernce level for the language.
+   */
   getExperienceDisplay(experience) {
     var experience_str = "";
 
@@ -164,9 +136,8 @@ export class CoachForm extends React.Component {
     return experience_str;
   }
 
-  
-  /*
-   * Check all entires are filled (other than bio)
+  /**
+   * Check all entires in this.state are filled (other than bio)
    */
   unfilledElements() {
     var unfilledItems = [];
@@ -175,7 +146,8 @@ export class CoachForm extends React.Component {
       if (!entry[1] || (Array.isArray(entry[1]) && entry[1].length === 0)) {
         // Allow the "available" value to be false
         // Allow the biography to be empty
-        let nullableEntries = ["available", "bio"];
+        // Allow coachID to be empty (this should only be filled by edit forms)
+        let nullableEntries = ["available", "bio", "coachID"];
         if (!nullableEntries.includes(entry[0])) {
           unfilledItems.push(entry[0]);
         }
@@ -191,9 +163,9 @@ export class CoachForm extends React.Component {
       return null;
     }
   }
-  
-  /*
-   * Check that each language entered has a proficiency set.
+
+  /**
+   * Check that each language in this.state.languages has a proficiency set.
    */
   checkLanguageProficiency() {
     var badLanguages = [];
@@ -201,8 +173,8 @@ export class CoachForm extends React.Component {
       if (!entry[1]) {
         badLanguages.push(entry[0]);
       }
-    })
-    
+    });
+
     /*
      * Only return list of errors if any are present.
      */
@@ -213,8 +185,8 @@ export class CoachForm extends React.Component {
     }
   }
 
-  /*
-   * Return all invalid elements from the form
+  /**
+   * Return all invalid elements from this.state
    */
   invalidFormElements() {
     var invalidItems = [];
@@ -246,19 +218,18 @@ export class CoachForm extends React.Component {
     }
   }
 
-  
-  /*
+  /**
    * Obtain confirmation message.
    */
   getFormConfirmationMessage() {
     var message = "";
 
     if (this.state.name) {
-      message += `First name: ${this.state.name}\n\n`
+      message += `First name: ${this.state.name}\n\n`;
     }
 
-    if (this.state.birthYear) {
-      message += `Birth year: ${this.state.birthYear}\n\n`;
+    if (this.state.birth_year) {
+      message += `Birth year: ${this.state.birth_year}\n\n`;
     }
 
     if (this.state.gender) {
@@ -268,38 +239,93 @@ export class CoachForm extends React.Component {
     if (this.state.available !== null) {
       message +=
         "Availability: " +
-        (this.state.available ? "Available" : "Not available")
-        + "\n\n";
+        (this.state.available ? "Available" : "Not available") +
+        "\n\n";
     }
 
     if (Object.keys(this.state.languages).length !== 0) {
       message +=
-        "Languages:\n" + this.getLanguagesDisplay(this.state.languages)
-        + "\n";
+        "Languages:\n" + cmn.getLanguagesDisplay(this.state.languages) + "\n";
     }
 
-    if (this.state.needLevels) {
+    if (this.state.need) {
       message +=
         "Experience in Level of Need:\n" +
-        this.getExperienceDisplay(this.state.needLevels)
-        + "\n";
+        this.getExperienceDisplay(this.state.need) +
+        "\n";
     }
 
-    if (this.state.rightsLevels) {
+    if (this.state.rights) {
       message +=
         "Experience in Rights Status:\n" +
-        this.getExperienceDisplay(this.state.rightsLevels)
-        + "\n";
+        this.getExperienceDisplay(this.state.rights) +
+        "\n";
     }
 
-    if (this.state.housingLevels) {
+    if (this.state.housing) {
       message +=
-        ("Experience in Housing Status:\n" +
-        this.getExperienceDisplay(this.state.housingLevels)
-        + "\n");
+        "Experience in Housing Status:\n" +
+        this.getExperienceDisplay(this.state.housing) +
+        "\n";
     }
 
     return message;
+  }
+
+  /**
+   * Return the object that should be passed to the handleSubmitConfirm
+   * function.
+   *
+   * Filters out entires that haven't been defined.
+   */
+  getConfirmObject() {
+    var form = {};
+
+    if (this.state.coachID) {
+      form.coachID = this.state.coachID;
+    }
+
+    if (this.state.name) {
+      form.name = this.state.name;
+    }
+
+    if (this.state.bio) {
+      form.bio = this.state.bio;
+    }
+
+    if (this.state.available) {
+      form.available = this.state.available;
+    }
+
+    if (this.state.birth_year) {
+      form.birth_year = this.state.birth_year;
+    }
+
+    if (this.state.gender) {
+      form.gender = this.state.gender;
+    }
+
+    if (Object.keys(this.state.languages).length > 0) {
+      console.log("Deducing language entry for form");
+      form.languages = this.state.languages;
+    }
+
+    if (this.state.need) {
+      console.log("Deducing need entry for form");
+      form.need = this.state.need.map((obj) => obj.type);
+    }
+
+    if (this.state.rights) {
+      console.log("Deducing rights entry for form");
+      form.rights = this.state.rights.map((obj) => obj.type);
+    }
+
+    if (this.state.housing) {
+      console.log("Deducing housing entry for form");
+      form.housing = this.state.housing.map((obj) => obj.type);
+    }
+
+    return form;
   }
 
   /*
@@ -321,17 +347,7 @@ export class CoachForm extends React.Component {
           {
             label: "Confirm",
             onClick: () => {
-              this.props.handleSubmitConfirm({
-                name: this.state.name,
-                bio: this.state.bio,
-                available: this.state.available,
-                birth_year: this.state.birthYear,
-                gender: this.state.gender,
-                languages: this.state.languages,
-                need: this.state.needLevels.map((obj) => obj.type),
-                rights: this.state.rightsLevels.map((obj) => obj.type),
-                housing: this.state.housingLevels.map((obj) => obj.type),
-              });
+              this.props.handleSubmitConfirm(this.getConfirmObject());
             },
           },
           {
@@ -363,14 +379,14 @@ export class CoachForm extends React.Component {
   handleSubmitPartialForm(event) {
     event.preventDefault();
 
-    var message = this.getFormConfirmationMessage()
+    var message = this.getFormConfirmationMessage();
     if (message === "") {
       message = "All entires";
     }
 
     var invalidElements = this.invalidFormElements();
     var badLanguages = this.checkLanguageProficiency();
-    if ((invalidElements === null) && (badLanguages === null)) {
+    if (invalidElements === null && badLanguages === null) {
       confirmAlert({
         title: "Confirm Coach Filter",
         message: message,
@@ -378,17 +394,7 @@ export class CoachForm extends React.Component {
           {
             label: "Confirm",
             onClick: () => {
-              this.props.handleSubmitConfirm({
-                name: this.state.name,
-                bio: this.state.bio,
-                available: this.state.available,
-                birth_year: this.state.birthYear,
-                gender: this.state.gender,
-                languages: this.state.languages,
-                need: this.state.needLevels.map((obj) => obj.type),
-                rights: this.state.rightsLevels.map((obj) => obj.type),
-                housing: this.state.housingLevels.map((obj) => obj.type),
-              });
+              this.props.handleSubmitConfirm(this.getConfirmObject());
             },
           },
           {
@@ -448,22 +454,22 @@ export class CoachForm extends React.Component {
   }
 
   onNeedChange(selectedList, currentItem) {
-    this.setState({ needLevels: selectedList.slice() });
+    this.setState({ need: selectedList.slice() });
     console.log(selectedList);
   }
 
   onRightsChange(selectedList, currentItem) {
-    this.setState({ rightsLevels: selectedList.slice() });
+    this.setState({ rights: selectedList.slice() });
     console.log(selectedList);
   }
 
   onHousingChange(selectedList, currentItem) {
-    this.setState({ housingLevels: selectedList.slice() });
+    this.setState({ housing: selectedList.slice() });
     console.log(selectedList);
   }
 
   onYearOfBirthChange(selectedList, currentItem) {
-    this.setState({ birthYear: currentItem });
+    this.setState({ birth_year: currentItem });
     console.log(currentItem);
   }
 
@@ -489,7 +495,12 @@ export class BlankForm extends CoachForm {
 
     this.full = full;
 
-    // All inheritting classes must set this attribute.
+    // All inheritting classes must set this attribute to a function that
+    // handles an event.
+    //
+    // Options are:
+    //  - this.handleSubmitFullForm
+    //  - this.handleSubmitPartialForm
     this.onSubmit = null;
   }
 
@@ -595,7 +606,7 @@ export class BlankForm extends CoachForm {
               <h4>Level of Need:</h4>
               <p>Enter levels of need the Coach has experience with.</p>
               <Multiselect
-                options={levelOfNeedOpts}
+                options={cmn.levelOfNeedOpts}
                 displayValue="desc"
                 onSelect={this.onNeedChange}
                 onRemove={this.onNeedChange}
@@ -609,7 +620,7 @@ export class BlankForm extends CoachForm {
               <h4>Rights Status:</h4>
               <p>Enter the rights statuses the Coach has experience with.</p>
               <Multiselect
-                options={rightsStatusOpts}
+                options={cmn.rightsStatusOpts}
                 displayValue="desc"
                 onSelect={this.onRightsChange}
                 onRemove={this.onRightsChange}
@@ -623,7 +634,7 @@ export class BlankForm extends CoachForm {
               <h4>Housing Status:</h4>
               <p>Enter the housing statuses the Coach has experience with.</p>
               <Multiselect
-                options={housingStatusOpts}
+                options={cmn.housingStatusOpts}
                 displayValue="desc"
                 onSelect={this.onHousingChange}
                 onRemove={this.onHousingChange}
