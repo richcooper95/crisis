@@ -1,19 +1,32 @@
-import argparse
 import json
 import os
-import sys
 from collections import namedtuple
 from typing import Collection, Dict, List, Optional, Tuple, Union
 
 import flask as flask
 
+
+# ------------------------------------------------------------------------------
+# Flask app
+# ------------------------------------------------------------------------------
+
 app = flask.Flask("crisis", static_folder="build/", static_url_path="/")
 logger = app.logger
 
+# In development mode, allow access from the Yarn-hosted frontend.
+if os.environ.get("FLASK_ENV") == "development":
+    import flask_cors
 
-JSON = Union[str, int, float, bool, None, List["JSON"], Dict[str, "JSON"]]
+    flask_cors.CORS(app, origins=["http://localhost:3000"])
+
+
+# ------------------------------------------------------------------------------
+# Database
+# ------------------------------------------------------------------------------
+
 
 # JSON type for coach data.
+JSON = Union[str, int, float, bool, None, List["JSON"], Dict[str, "JSON"]]
 CoachJSON = Dict[str, JSON]
 
 # Flask accepted response return types.
@@ -27,11 +40,6 @@ FlaskReturn = Union[
     Tuple[_FlaskResponse, _FlaskHeaders],
     Tuple[_FlaskResponse, _FlaskStatus, _FlaskHeaders],
 ]
-
-
-# ------------------------------------------------------------------------------
-# Database
-# ------------------------------------------------------------------------------
 
 
 class Coach(
@@ -184,11 +192,11 @@ class CoachDB:
             self.persist(file)
 
 
-# The in-memory database of coaches.
-coach_db: CoachDB
-
 # The file used to persist the coach DB.
 COACH_DB_FILE = "./coach_db.json"
+
+# The in-memory database of coaches.
+coach_db: CoachDB = CoachDB(COACH_DB_FILE)
 
 
 # ------------------------------------------------------------------------------
@@ -365,36 +373,3 @@ def api_coach_matches() -> FlaskReturn:
         raise
 
     return response
-
-
-# ------------------------------------------------------------------------------
-# Main
-# ------------------------------------------------------------------------------
-
-
-def parse_args(argv: List[str]) -> argparse.Namespace:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--dev", action="store_true", help="Run in developer mode")
-    return parser.parse_args(argv)
-
-
-def main(argv: List[str]):
-    global coach_db
-
-    args = parse_args(argv)
-
-    coach_db = CoachDB(COACH_DB_FILE)
-
-    if args.dev:
-        import flask_cors
-
-        port = 8000
-        os.environ["FLASK_ENV"] = "development"
-        flask_cors.CORS(app, origins=["http://localhost:3000"])
-    else:
-        port = 80
-    app.run(host="0.0.0.0", port=port)
-
-
-if __name__ == "__main__":
-    main(sys.argv[1:])
