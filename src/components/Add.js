@@ -3,6 +3,7 @@ import Loader from "react-loader-spinner";
 import { BlankForm } from "./Forms";
 //import 'react-confirm-alert/src/react-confirm-alert.css';
 
+import * as cmn from "../cmn.js";
 
 const displays = {
   FORM: "form",
