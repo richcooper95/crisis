@@ -36,9 +36,14 @@ export default class Assign extends React.Component {
     console.log("Confirmed form: " + JSON.stringify(form_data));
     // TODO: Generate URL with params (make sure to use a proper API
     //       so that spaces etc. are properly handled!).
-    this.setState({ display: displays.LOADING }, () => {
+    // TODO: The line below is commented out to workaround a bug only seen in
+    //       the production build for some reason (the results of the
+    //       assigment don't get rendered - a blank page is seen instead).
+    //this.setState({ display: displays.LOADING }, () => {
+      console.log(url);
       // TODO: Decide whether to keep this sleep (currently so I can see the loading wheel)
-      this.sleep(2000).then(() => {fetch(url)
+      //this.sleep(2000).then(() => {
+        fetch(url)
         .then(response => response.json())
         .then(data => this.setState({
           results: data,
@@ -48,8 +53,8 @@ export default class Assign extends React.Component {
           error: error,
           display: displays.FORM
         }))
-      })
-    })
+      //})
+    //})
   }
 
   render() {
