@@ -34,8 +34,6 @@ export default class Assign extends React.Component {
 
   handleSubmitConfirm(form_data, url) {
     console.log("Confirmed form: " + JSON.stringify(form_data));
-    // TODO: Generate URL with params (make sure to use a proper API
-    //       so that spaces etc. are properly handled!).
     // TODO: The line below is commented out to workaround a bug only seen in
     //       the production build for some reason (the results of the
     //       assigment don't get rendered - a blank page is seen instead).
@@ -250,8 +248,14 @@ class AssignForm extends React.Component {
   }
 
   getCoachMatchUrl() {
-    // XXX url hardcoded to localhost for development.
-    var url_fmt = "http://localhost:8000/api/v1/coach-matches?birth_year={0}&gender={1}&languages={2}&need={3}&rights={4}&housing={5}";
+    //TODO: Need better URL creation common to all components.
+    var url_base;
+    if (process.env.NODE_ENV !== "production") {
+      url_base = "http://localhost:8000/";
+    } else {
+      url_base = "https://6zn597dwdd.execute-api.eu-west-2.amazonaws.com/dev/";
+    }
+    var url_fmt = url_base + "api/v1/coach-matches?birth_year={0}&gender={1}&languages={2}&need={3}&rights={4}&housing={5}";
 
     var url = this.format(url_fmt,
                           this.state.year,
