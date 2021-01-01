@@ -1,5 +1,6 @@
 import json
 import os
+import functools
 from collections import defaultdict, namedtuple
 from typing import Collection, Dict, List, Optional, Tuple, Union
 
@@ -282,6 +283,20 @@ def _coach_matches_filter(coach: CoachJSON,
     return True
 
 
+# Using flask_cors doesn't seem to have the desired effect for the API when
+# deployed on AWS Lambda, so we create our own decorator that sets the CORS
+# header and apply it to the API route handlers.
+def allow_cors(route_handler):
+    @functools.wraps(route_handler)
+    def wrapper(*args, **kwargs):
+        response = route_handler(*args, **kwargs)
+        response = flask.make_response(response)
+        #TODO: replace wildcard with expected origin(s).
+        response.headers["Access-Control-Allow-Origin"] = "*"
+        return response
+    return wrapper
+
+
 # ------------------------------------------------------------------------------
 # Route handlers
 # ------------------------------------------------------------------------------
@@ -383,6 +398,7 @@ def index() -> flask.Response:
 
 
 @app.route("/api/v1/coaches", methods=["GET", "POST"])
+@allow_cors
 def api_coaches() -> FlaskReturn:
     """HTTP API for 'coaches'."""
     try:
@@ -404,6 +420,7 @@ def api_coaches() -> FlaskReturn:
 
 
 @app.route("/api/v1/coaches/<int:coach_id>", methods=["GET", "POST", "DELETE"])
+@allow_cors
 def api_coaches_id(coach_id: int) -> FlaskReturn:
     """HTTP API for 'coaches' with ID given."""
     try:
@@ -426,6 +443,7 @@ def api_coaches_id(coach_id: int) -> FlaskReturn:
 
 
 @app.route("/api/v1/coach-matches", methods=["GET"])
+@allow_cors
 def api_coach_matches() -> FlaskReturn:
     """HTTP API for 'coach-matches'."""
     try:
