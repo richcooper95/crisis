@@ -1,13 +1,7 @@
 {
   "features": {
-    "frontend-ios": {
-      "enablexcodeintegration": true
-    },
     "auth": {
       "enablecaseinsensitivity": true
-    },
-    "codegen": {
-      "useappsyncmodelgenplugin": true
     }
   }
 }

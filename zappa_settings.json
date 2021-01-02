@@ -9,6 +9,12 @@
         "keep_warm": false,
         "exclude": [
             "node_modules"
-        ]
+        ],
+        "authorizer": {
+            "type": "COGNITO_USER_POOLS",
+            "provider_arns": [
+                "arn:aws:cognito-idp:eu-west-2:041736322230:userpool/eu-west-2_uzUfu5iJu"
+            ]
+        }
     }
 }
