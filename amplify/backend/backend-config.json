@@ -1,0 +1,10 @@
+{
+  "auth": {
+    "crisis42c21ceb": {
+      "service": "Cognito",
+      "providerPlugin": "awscloudformation",
+      "dependsOn": [],
+      "customAuth": false
+    }
+  }
+}
