@@ -4,40 +4,11 @@ import { confirmAlert } from 'react-confirm-alert';
 import Loader from 'react-loader-spinner';
 //import 'react-confirm-alert/src/react-confirm-alert.css';
 
-const levelOfNeedOpts = [
-  {"type": 1, "desc": "1 - No intervention necessary"},
-  {"type": 2, "desc": "2 - Signpost to other resources"},
-  {"type": 3, "desc": "3 - Information, advice and guidance (IAG)"},
-  {"type": 4, "desc": "4 - Coaching and skills"},
-  {"type": 5, "desc": "5 - Coaching engagement skills"},
-  {"type": 6, "desc": "6 - Intensive support needed"},
-]
-
-const rightsStatusOpts = [
-  {"type": 1, "desc": "1 - No intervention necessary"},
-  {"type": 2, "desc": "2 - No recourse to public funds"},
-]
-
-const housingStatusOpts = [
-  {"type": 1, "desc": "1 - No intervention necessary"},
-  {"type": 2, "desc": "2 - At risk"},
-  {"type": 3, "desc": "3 - Unsuitable temporary accommodation"},
-  {"type": 4, "desc": "4 - Rough sleeping"},
-]
-
-const langProficiencyOpts = [
-  {"type": 1, "desc": "1 - Good"},
-  {"type": 2, "desc": "2 - Bad"},
-  {"type": 3, "desc": "3 - Ugly"},
-]
+import * as cmn from "../cmn.js";
 
 const displays = {
   FORM: "form",
   LOADING: "loading",
-}
-
-function capitalise(str) {
-    return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
 export default class Add extends React.Component {
@@ -120,7 +91,7 @@ function AddLoader(props) {
   )
 }
 
-class AddForm extends React.Component {
+export class AddForm extends React.Component {
   constructor(props) {
     super(props);
     this.renderLanguageProficiencies = this.renderLanguageProficiencies.bind(this);
@@ -163,7 +134,7 @@ class AddForm extends React.Component {
             </div>
             <div className="proficiency-choice">
               <Multiselect
-                options={langProficiencyOpts}
+                options={cmn.langProficiencyOpts}
                 displayValue="desc"
                 closeIcon="cancel"
                 placeholder="Select Proficiency"
@@ -178,16 +149,6 @@ class AddForm extends React.Component {
       }
     }
     return languageFragments;
-  }
-
-  getLanguagesDisplay() {
-    var languages_str = "";
-
-    Object.entries(this.state.languages).forEach((entry) => {
-      languages_str += capitalise(entry[0]) + " (" + entry[1] + "), ";
-    })
-
-    return languages_str.slice(0, -2);
   }
 
   getExperienceDisplay(experience) {
@@ -210,9 +171,9 @@ class AddForm extends React.Component {
         title: 'Confirm Coach Details',
         message: ('First name: ' + this.state.name +
                   '\nBirth year: ' + this.state.birthYear +
-                  '\nGender: ' + capitalise(this.state.gender) +
+                  '\nGender: ' + cmn.capitalise(this.state.gender) +
                   '\nAvailability: ' + (this.state.available ? 'Available' : 'Not available') +
-                  '\nLanguages: ' + this.getLanguagesDisplay(this.state.languages) +
+                  '\nLanguages: ' + cmn.getLanguagesDisplay(this.state.languages) +
                   '\nExperience in Level of Need: ' + this.getExperienceDisplay(this.state.needLevels) +
                   '\nExperience in Rights Status: ' + this.getExperienceDisplay(this.state.rightsLevels) +
                   '\nExperience in Housing Status: ' + this.getExperienceDisplay(this.state.housingLevels)),
@@ -438,7 +399,7 @@ class AddForm extends React.Component {
                 Enter levels of need the Coach has experience with.
               </p>
               <Multiselect
-                options={levelOfNeedOpts}
+                options={cmn.levelOfNeedOpts}
                 displayValue="desc"
                 onSelect={this.onNeedChange}
                 onRemove={this.onNeedChange}
@@ -453,7 +414,7 @@ class AddForm extends React.Component {
                 Enter the rights statuses the Coach has experience with.
               </p>
               <Multiselect
-                options={rightsStatusOpts}
+                options={cmn.rightsStatusOpts}
                 displayValue="desc"
                 onSelect={this.onRightsChange}
                 onRemove={this.onRightsChange}
@@ -468,7 +429,7 @@ class AddForm extends React.Component {
                 Enter the housing statuses the Coach has experience with.
               </p>
               <Multiselect
-                options={housingStatusOpts}
+                options={cmn.housingStatusOpts}
                 displayValue="desc"
                 onSelect={this.onHousingChange}
                 onRemove={this.onHousingChange}

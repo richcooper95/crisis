@@ -9,32 +9,7 @@ import "react-loader-spinner/dist/loader/css/react-spinner-loader.css"
 // @@@ Used in testing
 //const dummyResults = [{"id":0,"name":"Bob","bio":"Hey, Bob here.","available":true,"birth_year":1992,"gender":"male","languages":{"english":1,"spanish":4},"need":[1,2,3],"rights":[2],"housing":[3],"match_score":35},{"id":4,"name":"Mike","bio":"","available":true,"birth_year":1970,"gender":"male","languages":{"spanish":1,"french":2},"need":[1,2,3],"rights":[2],"housing":[3],"match_score":5},{"id":1,"name":"Albert","bio":"","available":true,"birth_year":1990,"gender":"other","languages":{},"need":[1,2,3],"rights":[2],"housing":[3],"match_score":5},{"id":2,"name":"Kelly S.","bio":"","available":true,"birth_year":1988,"gender":"female","languages":{},"need":[1,2,3],"rights":[2],"housing":[3],"match_score":4}]
 
-const levelOfNeedOpts = [
-  {"type": 1, "desc": "1 - No intervention necessary"},
-  {"type": 2, "desc": "2 - Signpost to other resources"},
-  {"type": 3, "desc": "3 - Information, advice and guidance (IAG)"},
-  {"type": 4, "desc": "4 - Coaching and skills"},
-  {"type": 5, "desc": "5 - Coaching engagement skills"},
-  {"type": 6, "desc": "6 - Intensive support needed"},
-]
-
-const rightsStatusOpts = [
-  {"type": 1, "desc": "1 - No intervention necessary"},
-  {"type": 2, "desc": "2 - No recourse to public funds"},
-]
-
-const housingStatusOpts = [
-  {"type": 1, "desc": "1 - No intervention necessary"},
-  {"type": 2, "desc": "2 - At risk"},
-  {"type": 3, "desc": "3 - Unsuitable temporary accommodation"},
-  {"type": 4, "desc": "4 - Rough sleeping"},
-]
-
-const langProficiencyOpts = [
-  {"type": 1, "desc": "1 - Good"},
-  {"type": 2, "desc": "2 - Bad"},
-  {"type": 3, "desc": "3 - Ugly"},
-]
+import * as cmn from "../cmn.js";
 
 const displays = {
   FORM: "form",
@@ -171,7 +146,7 @@ class AssignResults extends React.Component {
     var languages_str = "";
 
     Object.entries(languages).forEach((entry) => {
-      languages_str += this.capitalize(entry[0]) + " (" + entry[1] + ")\n";
+      languages_str += cmn.capitalise(entry[0]) + " (" + entry[1] + ")\n";
     })
 
     return languages_str.slice(0, -2);
@@ -242,7 +217,7 @@ class AssignForm extends React.Component {
             </div>
             <div className="proficiency-choice">
               <Multiselect
-                options={langProficiencyOpts}
+                options={cmn.langProficiencyOpts}
                 displayValue="desc"
                 closeIcon="cancel"
                 placeholder="Select Proficiency"
@@ -257,20 +232,6 @@ class AssignForm extends React.Component {
       }
     }
     return languageFragments;
-  }
-
-  getLanguagesDisplay() {
-    var languages_str = "";
-
-    Object.entries(this.state.languages).forEach((entry) => {
-      languages_str += this.capitalize(entry[0]) + " (" + entry[1] + "), ";
-    })
-
-    return languages_str.slice(0, -2);
-  }
-
-  capitalize(string) {
-    return string.charAt(0).toUpperCase() + string.slice(1);
   }
 
   format = function() {
@@ -317,8 +278,8 @@ class AssignForm extends React.Component {
       confirmAlert({
         title: 'Confirm Member Details',
         message: ('Year of Birth: ' + this.state.year +
-                  '\nGender: ' + this.capitalize(this.state.gender) +
-                  '\nLanguages: ' + this.getLanguagesDisplay() +
+                  '\nGender: ' + cmn.capitalise(this.state.gender) +
+                  '\nLanguages: ' + cmn.getLanguagesDisplay(this.state.languages) +
                   '\nLevel of Need: ' + this.state.need +
                   '\nRights Status: ' + this.state.rights +
                   '\nHousing Status: ' + this.state.housing),
@@ -493,7 +454,7 @@ class AssignForm extends React.Component {
                 Enter the Member's level of need.
               </p>
               <Multiselect
-                options={levelOfNeedOpts}
+                options={cmn.levelOfNeedOpts}
                 displayValue="desc"
                 closeIcon="cancel"
                 placeholder="Select Level of Need"
@@ -508,7 +469,7 @@ class AssignForm extends React.Component {
                 Enter the Member's rights status.
               </p>
               <Multiselect
-                options={rightsStatusOpts}
+                options={cmn.rightsStatusOpts}
                 displayValue="desc"
                 closeIcon="cancel"
                 placeholder="Select Rights Status"
@@ -523,7 +484,7 @@ class AssignForm extends React.Component {
                 Enter the Member's housing status.
               </p>
               <Multiselect
-                options={housingStatusOpts}
+                options={cmn.housingStatusOpts}
                 displayValue="desc"
                 closeIcon="cancel"
                 placeholder="Select Housing Status"
