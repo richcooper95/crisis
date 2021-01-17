@@ -291,8 +291,11 @@ def allow_cors(route_handler):
     def wrapper(*args, **kwargs):
         response = route_handler(*args, **kwargs)
         response = flask.make_response(response)
-        #TODO: replace wildcard with expected origin(s).
-        response.headers["Access-Control-Allow-Origin"] = "*"
+        # TODO: Replace with the final expected origins, one for each frontend
+        # branch that we expect to deploy into AWS. Probably want these defined
+        # in a metadata file, rather than here in the server code.
+        response.headers["Access-Control-Allow-Origin"] = \
+            "https://aws-amplify.d1nt2xg69cmmwk.amplifyapp.com"
         return response
     return wrapper
 

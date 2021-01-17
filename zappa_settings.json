@@ -13,7 +13,7 @@
         "authorizer": {
             "type": "COGNITO_USER_POOLS",
             "provider_arns": [
-                "arn:aws:cognito-idp:eu-west-2:041736322230:userpool/eu-west-2_uzUfu5iJu"
+                "arn:aws:cognito-idp:eu-west-2:233928554688:userpool/eu-west-2_G4pBFSApd"
             ]
         }
     }

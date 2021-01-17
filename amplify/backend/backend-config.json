@@ -1,10 +1,17 @@
 {
   "auth": {
-    "crisis42c21ceb": {
+    "crisis3cf75f3a": {
       "service": "Cognito",
       "providerPlugin": "awscloudformation",
       "dependsOn": [],
       "customAuth": false
+    }
+  },
+  "hosting": {
+    "amplifyhosting": {
+      "service": "amplifyhosting",
+      "type": "cicd",
+      "lastPushTimeStamp": "2021-01-17T19:08:52.771Z"
     }
   }
 }
