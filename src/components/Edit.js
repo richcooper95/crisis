@@ -39,15 +39,114 @@ export default class Edit extends React.Component {
   }
 
   /**
+   * Log error and set display state.
+   *
+   * @param error
+   * @param dispalyState
+   */
+  reset_state_log_error(error, dispalyState) {
+    alert(error);
+    console.log(error);
+    console.log(error.stack);
+    this.setState({ display: dispalyState });
+  }
+
+  /**
+   * Convert a list of coaches into a dictionary, from coachID:coachDetails
+   */
+  coachArrayToObject(coachArray) {
+    var coachObjects = {};
+    coachArray.forEach((coach) => {
+      coachObjects[coach["id"]] = coach;
+    });
+    return coachObjects;
+  }
+
+  /**
+   * Remove a coach from the table and set state to TABLE.
+   *
+   * @param coachID  the coach to remove from the table
+   */
+  removeCoachFromTable(coachID) {
+    console.log(`removed coach ${coachID} from the table`);
+
+    var newTableData = this.state.tableData;
+    delete newTableData[coachID];
+    this.setState({ tableData: newTableData });
+
+    // Set state to table
+    this.setState({ display: displays.TABLE });
+  }
+
+  /**
+   * Update a coach's data in tableData and set state to TABLE.
+   *
+   * @param coachID  the coach to remove from the table
+   */
+  upadteCoachInTable(form_data) {
+    console.log(`Updated coach ${form_data["id"]}`);
+
+    var newTableData = this.state.tableData;
+    newTableData[form_data["id"]] = form_data;
+    this.setState({ tableData: newTableData });
+
+    // Set state to table
+    this.setState({ display: displays.TABLE });
+  }
+
+  /**
+   * Obtain the URL to poll for coach data using the filter coachFilter.
+   *
+   * @param coachFilter the coach filter
+   */
+  get_search_url(coachFilter) {
+    var url = "http://localhost:8000/api/v1/coaches?";
+
+    // simple_keys is the list of keys that do not need formatting.
+    var simple_keys = ["available", "birth_year", "gender", "name"];
+    simple_keys.forEach((key) => {
+      if (key in coachFilter) {
+        url += `&${key}=${coachFilter[key]}`;
+      }
+    });
+
+    // experience_keys is the list of keys that need formatting similarly for a
+    // list of ints.
+    var experience_keys = ["housing", "need", "rights"];
+    experience_keys.forEach((key) => {
+      if (key in coachFilter) {
+        url += `&${key}=${cmn.getExperienceForUrl(coachFilter[key])}`;
+      }
+    });
+
+    // Special casing for language as the only dict
+    if ("languages" in coachFilter) {
+      url += `&languages=${cmn.getLanguagesForUrl(coachFilter.languages)}`;
+    }
+
+    return url;
+  }
+
+  /**
    * Handle the user selecting to edit the coach with coachID from the table.
    *
    * @param {Number} coachID The ID of the coach to edit.
    */
   handleEditRequest(coachID) {
-    // Set to edit display with correct values.
-    // Save coachID as this.state.editID
-    this.setState({ editID: coachID });
-    this.setState({ display: displays.EDIT });
+    // Set state to LOADING while getting coach details from server.
+    // Set state to EDIT after receiving details.
+    var url = `http://localhost:8000/api/v1/coaches/${coachID}`;
+    this.setState({ display: displays.LOADING }, () => {
+      fetch(url)
+        .then((response) => response.json())
+        .then((data) =>
+          this.setState({
+            editID: coachID,
+            display: displays.EDIT,
+          })
+        )
+        .catch((error) => this.reset_state_log_error(error, displays.TABLE));
+    });
   }
 
   /**
@@ -59,8 +158,6 @@ export default class Edit extends React.Component {
   }
 
   /**
-   * UNFINISHED
-   *
    * Edit an existing coach, then set display to the TABLE showing all searched
    * for coaches.
    *
@@ -68,99 +165,63 @@ export default class Edit extends React.Component {
    * @param {Object} form_data The updated form data for the coach.
    */
   handleEditConfirm(form_data) {
-    // Update db entry for form_data.coachID
-    // Set to table display
-    // Save all coaches as this.state.tableData
-    alert(JSON.stringify(form_data));
-
     console.log("Confirmed form: " + JSON.stringify(form_data));
     this.setState({ display: displays.LOADING });
 
-    this.setState({ display: displays.TABLE });
+    // Hardcode to localhost:8000 for development mode.
+    var url = `http://localhost:8000/api/v1/coaches/${form_data["id"]}`;
+    fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(form_data),
+    })
+      .then(this.upadteCoachInTable(form_data))
+      .catch((error) => this.reset_state_log_error(error, displays.TABLE));
   }
 
   /**
-   * UNFINISHED
-   *
-   * Remove a coach from the table
-   *
-   * @param coachID  the coach to remove from the table
-   */
-  removeCoachFromTable(coachID) {
-    alert(`removed coach ${coachID} from the table`);
-  }
-
-  /**
-   * UNFINISHED
    *
    * Delete a coach from the database and return display to the table.
    *
    * @param {Number} coachID The ID of the coach to remove.
    */
   handleDeleteConfirm(coachID) {
-    // Remove coachID from db
-    // Set to table display
-    alert(`deleted coach ${coachID}`);
-
     console.log("Confirmed delete" + coachID);
-    this.setState({ display: displays.LOADING });
+    var url = `http://localhost:8000/api/v1/coaches/${coachID}`;
 
-    /*
-     * Remove coach from table so coach isn't deleted/editted.
-     */
-    this.removeCoachFromTable(coachID);
-    this.setState({ display: displays.TABLE });
+    // Set state to LOADING while getting coach details from server.
+    // Set state to TABLE after receiving details.
+    this.setState({ display: displays.LOADING }, () => {
+      fetch(url, { method: "delete" })
+        .then((response) => console.log(response))
+        .then((data) => this.removeCoachFromTable(coachID))
+        .catch((error) => this.reset_state_log_error(error, displays.TABLE));
+    });
   }
 
   /**
-   * UNFINISHED
-   *
    * Search for all coaches matching form_data and set display to table
    *
    * @param {Object} form_data The updated form data for the coach.
    */
   handleSearchConfirm(form_data) {
-    // Poll server for all coaches matching data.
-    // Set to table display
-    // Save all coaches as this.state.tableData
-    alert(JSON.stringify(form_data));
+    console.log("Confirmed search form: " + JSON.stringify(form_data));
+    var url = this.get_search_url(form_data);
 
-    console.log("Confirmed form: " + JSON.stringify(form_data));
-    this.setState({ display: displays.LOADING });
-
-    // @@@ Remove when properly implemented
-    this.setState({
-      tableData: [
-        {
-          coachID: 9999,
-          birth_year: 1000,
-          name: "hello",
-          gender: "Male",
-          available: true,
-          bio: "pii",
-          languages: {
-            english: { type: 1, desc: "1 - Good" },
-            french: { type: 2, desc: "2 - Good" },
-          },
-          need: [
-            { type: 1, desc: "1 - No intervention necessary" },
-            { type: 2, desc: "2 - No recourse to public funds" },
-          ],
-          rights: [
-            { type: 1, desc: "1 - No intervention necessary" },
-            { type: 2, desc: "2 - No recourse to public funds" },
-          ],
-          housing: [
-            { type: 1, desc: "1 - No intervention necessary" },
-            { type: 2, desc: "2 - At risk" },
-            { type: 3, desc: "3 - Unsuitable temporary accommodation" },
-            { type: 4, desc: "4 - Rough sleeping" },
-          ],
-        },
-      ],
+    // Set state to LOADING while getting coach details from server.
+    // Set state to TABLE after receiving details.
+    this.setState({ display: displays.LOADING }, () => {
+      fetch(url)
+        .then((response) => response.json())
+        .then((data) =>
+          this.setState({
+            tableData: this.coachArrayToObject(data),
+            searchFields: form_data,
+            display: displays.TABLE,
+          })
+        )
+        .catch((error) => this.reset_state_log_error(error, displays.SEARCH));
     });
-
-    this.setState({ display: displays.TABLE });
   }
 
   /**
@@ -183,7 +244,7 @@ export default class Edit extends React.Component {
           <EditForm
             handleEditCancel={this.handleEditCancel}
             handleSubmitConfirm={this.handleEditConfirm}
-            editID={this.state.editID}
+            coachDetails={this.state.tableData[this.state.editID]}
           />
         );
         break;
@@ -228,48 +289,84 @@ class EditForm extends CoachForm {
 
     /**
      * Set the starting state to the current coach information.
+     *
+     * stringigy/parse so this.props.coachDetails aren't altered before
+     * clicking submit.
      */
-    this.state = this.getCoach(this.props.editID);
+    this.state = JSON.parse(JSON.stringify(this.props.coachDetails));
+
+    // If bio is null, set it to empty string. This prevents React from
+    // complaining about displaying null values.
+    if (this.state.bio === null) {
+      this.state.bio = "";
+    }
+
+    // Covert need, rights and housing to the form to display on screen.
+    // Need
+    if (this.state.need !== null) {
+      this.state.need = this.state.need.map((need) =>
+        this.get_need_from_int(need)
+      );
+    }
+
+    // Rights
+    if (this.state.rights !== null) {
+      this.state.rights = this.state.rights.map((rights) =>
+        this.get_rights_from_int(rights)
+      );
+    }
+
+    // Housing
+    if (this.state.housing !== null) {
+      this.state.housing = this.state.housing.map((housing) =>
+        this.get_housing_from_int(housing)
+      );
+    }
   }
 
   /**
-   * UNFINISHED
-   *
-   * Obtain entry for coachID
-   *
-   * Doesn't work.
+   * Return a type:desc object for need level.
+   * @param need
    */
-  getCoach(coachID) {
-    // Poll server data for coachID
-    alert(`Loading data for coach ID ${coachID}`);
+  get_need_from_int(need) {
+    for (const need_obj of cmn.levelOfNeedOpts) {
+      if (need_obj.type === need) {
+        return need_obj;
+      }
+    }
 
-    // @@@ remove when implemented
-    return {
-      coachID: coachID,
-      birth_year: 1000,
-      name: "hello",
-      gender: "Male",
-      available: true,
-      bio: "pii",
-      languages: {
-        english: 1,
-        french: 2,
-      },
-      need: [
-        { type: 1, desc: "1 - No intervention necessary" },
-        { type: 2, desc: "2 - No recourse to public funds" },
-      ],
-      rights: [
-        { type: 1, desc: "1 - No intervention necessary" },
-        { type: 2, desc: "2 - No recourse to public funds" },
-      ],
-      housing: [
-        { type: 1, desc: "1 - No intervention necessary" },
-        { type: 2, desc: "2 - At risk" },
-        { type: 3, desc: "3 - Unsuitable temporary accommodation" },
-        { type: 4, desc: "4 - Rough sleeping" },
-      ],
-    };
+    // If reaching here, unknow need encountered.
+    alert(`Unknown need level ${JSON.stringify(need)}`);
+  }
+
+  /**
+   * Return a type:desc object for rights level.
+   * @param rights
+   */
+  get_rights_from_int(rights) {
+    for (const rights_obj of cmn.rightsStatusOpts) {
+      if (rights_obj.type === rights) {
+        return rights_obj;
+      }
+    }
+
+    // If reaching here, unknow rights encountered.
+    alert(`Unknown rights level ${JSON.stringify(rights)}`);
+  }
+
+  /**
+   * Return a type:desc object for housing level.
+   * @param housing
+   */
+  get_housing_from_int(housing) {
+    for (const housing_obj of cmn.housingStatusOpts) {
+      if (housing_obj.type === housing) {
+        return housing_obj;
+      }
+    }
+
+    // If reaching here, unknow housing encountered.
+    alert(`Unknown housing level ${JSON.stringify(housing)}`);
   }
 
   /**
@@ -432,7 +529,9 @@ class EditForm extends CoachForm {
           </div>
 
           <div className="edit-form-submit">
-            <button type="submit">Submit</button>
+            <button type="submit" onClick={this.onSubmit}>
+              Submit
+            </button>
           </div>
 
           <div className="edit-form-cancel">
@@ -448,11 +547,14 @@ class EditForm extends CoachForm {
 
 /*
  * Defines a form that allows for searching of coaches based on specified
- * traits
+ * traits.
  */
 class SearchForm extends BlankForm {
   constructor(props) {
     super(props);
+
+    // Allow for form to only be partially completed. This allows users to only
+    // specify the fields they care about.
     this.onSubmit = this.handleSubmitPartialForm;
   }
 }
@@ -499,7 +601,9 @@ class CoachesTable extends React.Component {
    * @param coachID the ID of the coach to delete
    */
   getDeleteConfirmationMessage(coachID) {
-    return `Are you sure you want to delete coach ${coachID} from the database?`;
+    var msg = "Are you sure you want to delete coach ";
+    msg += `${this.props.tableData[coachID]["name"]} from the database?`;
+    return msg;
   }
 
   /**
@@ -560,8 +664,8 @@ class CoachesTable extends React.Component {
       birth_year: coachDetails.birth_year,
       gender: coachDetails.gender,
       available: coachDetails.available ? "true" : "false",
-      editButton: this.getEditButton(coachDetails.coachID),
-      deteleButton: this.getDeleteButton(coachDetails.coachID),
+      editButton: this.getEditButton(coachDetails.id),
+      deteleButton: this.getDeleteButton(coachDetails.id),
     };
   }
 
@@ -572,7 +676,7 @@ class CoachesTable extends React.Component {
    * availability.
    */
   getData() {
-    return this.props.tableData.map(this.formatCoach, this);
+    return Object.values(this.props.tableData).map(this.formatCoach, this);
   }
 
   /**

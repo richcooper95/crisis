@@ -245,23 +245,13 @@ class AssignForm extends React.Component {
     return s;
   }
 
-  getLanguagesForUrl() {
-    var languages_str = "";
-
-    Object.entries(this.state.languages).forEach((entry) => {
-      languages_str += this.format("{0}:{1},", entry[0], entry[1]);
-    })
-
-    return languages_str.slice(0, -1);
-  }
-
   getCoachMatchUrl() {
     var url_fmt = "http://localhost:8000/api/v1/coach-matches?birth_year={0}&gender={1}&languages={2}&need={3}&rights={4}&housing={5}";
 
     var url = this.format(url_fmt,
                           this.state.year,
                           this.state.gender,
-                          this.getLanguagesForUrl(),
+                          cmn.getLanguagesForUrl(this.state.languages),
                           this.state.need,
                           this.state.rights,
                           this.state.housing);

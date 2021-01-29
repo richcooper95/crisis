@@ -66,7 +66,7 @@ class Coach(
         *,
         id: Optional[int] = None,
         name: str,
-        bio: str,
+        bio: Optional[str] = None,
         available: bool = True,
         birth_year: int,
         gender: str,
@@ -99,6 +99,9 @@ class Coach(
 
     def copy(self) -> "Coach":
         return self.from_json(self.to_json())
+
+    def get(self, key) -> JSON:
+        return getattr(self, key)
 
 
 class CoachDB:
@@ -214,13 +217,104 @@ def _parse_languages(languages: str) -> Dict[str, int]:
     return ret
 
 
+def _parse_need(need: str) -> List[int]:
+    """
+    Return a string containing integers separated by commas as a list of ints.
+    """
+
+    ret = list()
+    if not need:
+        return ret
+    for need_level in need.split(","):
+        ret.append(int(need_level))
+    return ret
+
+
+def _get_coach_json(coach_args: JSON) -> CoachJSON:
+    """
+    Return a CoachJSON object corresponding the args from the get coaches
+    request.
+    """
+
+    # Turn all interger arguments into ints.
+    for int_arg in ["birth_year"]:
+        if int_arg in coach_args:
+            coach_args[int_arg] = int(coach_args[int_arg])
+
+    # Turn all list of interger arguments into lists of ints
+    for list_int_arg in ["need", "rights", "housing"]:
+        if list_int_arg in coach_args:
+            # _parse_need() works for rights and housing also
+            coach_args[list_int_arg] = _parse_need(coach_args[list_int_arg])
+
+    # Special case languages as it's a dict.
+    if "languages" in coach_args:
+        coach_args["languages"] = _parse_languages(coach_args["languages"])
+    
+    return coach_args
+
+
+def _include_coach(coach: CoachJSON, coach_filter: CoachJSON) -> bool:
+    """
+    Check whether to include a coach from the db in a repsoonse by filtering on
+    if the coach matches the fields in coach_filter.
+    """
+
+    if not coach_filter:
+        return True
+
+    # Keys where we need coach[key] == coach_filter[key]
+    direct_comparison_keys = [
+        "available",
+        "bio",
+        "birth_year",
+        "gender",
+        "id",
+        "name",
+    ]
+    for key in direct_comparison_keys:
+        if key in coach_filter:
+            if not coach.get(key) == coach_filter[key]:
+                return False
+
+    # Keys where we need coach[key] to be a superset of coach_filter[key]
+    subset_comparison_keys = [
+        "housing",
+        "languages",
+        "need",
+        "rights",
+    ]
+    for key in subset_comparison_keys:
+        if key in coach_filter:
+            # If value is list, turn into sets for comparison.
+            if type(coach_filter[key]) is list:
+                if not set(coach_filter[key]) <= set(coach.get(key)):
+                    return False
+
+            # If value is dict, use all to check each key:value pair in
+            # coach_filter[key] is in coach[key].
+            elif type(coach_filter[key]) is dict:
+                if not all(
+                    item in coach.get(key).items()
+                    for item in coach_filter[key].items()
+                ):
+                    return False
+
+    return True
+
+
 # ------------------------------------------------------------------------------
 # Route handlers
 # ------------------------------------------------------------------------------
 
 
-def get_coaches() -> List[Coach]:
-    return list(coach_db)
+def get_coaches(coach_filter: CoachJSON) -> List[Coach]:
+    """Return all coaches that match coach_filter."""
+    return [
+        coach
+        for coach in coach_db
+        if _include_coach(coach, coach_filter) == True
+    ]
 
 
 def get_coach(coach_id: int) -> Coach:
@@ -280,7 +374,7 @@ def get_coach_matches(data: CoachJSON) -> List[Tuple[int, Coach]]:
         return max((0, *[30 - 2 * languages[L] * c.languages[L] for L in match_langs]))
 
     coach_matches = []
-    for coach in get_coaches():
+    for coach in get_coaches(None):
         if not coach.available:
             continue
         match_score = 0
@@ -315,7 +409,9 @@ def api_coaches() -> FlaskReturn:
     """HTTP API for 'coaches'."""
     try:
         if flask.request.method == "GET":
-            coaches = get_coaches()
+            args = dict(**flask.request.args)
+            coach_filter = _get_coach_json(args)
+            coaches = get_coaches(coach_filter)
             response = flask.jsonify([c.to_json() for c in coaches])
         elif flask.request.method == "POST":
             coach = create_coach(flask.request.json)

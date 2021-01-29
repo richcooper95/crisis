@@ -48,9 +48,13 @@ export function getLanguagesDisplay(languages) {
   return languages_str;
 }
 
+/**
+ * Defines spinner for loading display.
+ *
+ * Props arg required to make this compatible as a ReactComponent.
+ */
 export function LoaderDisplay(props) {
   return (
-    // @@@ This doesn't seem to justify the spinner in the centre...
     <div
       style={{
         width: "100vw",
@@ -63,4 +67,41 @@ export function LoaderDisplay(props) {
       <Loader type="TailSpin" color="#EC2229" height={80} width={80} />
     </div>
   );
+}
+
+/**
+ * Return a string to be appended to a URL as part of a HTTP request for
+ * specifying languages.
+ *
+ * @param languages
+ */
+export function getLanguagesForUrl(languages) {
+  var languages_str = "";
+
+  Object.entries(languages).forEach((entry) => {
+    languages_str += `${entry[0]}:${entry[1]},`;
+  });
+
+  return languages_str.slice(0, -1);
+}
+
+/**
+ * Return a string to be appended to a URL as part of a HTTP request for
+ * specifying an experience (e.g. need, housing, rights).
+ *
+ * @param experience
+ */
+export function getExperienceForUrl(experience) {
+  var experience_str = "";
+
+  experience.forEach((entry) => {
+    experience_str += `${entry},`;
+  });
+
+  // Srip used to remove final trailing comma.
+  if (experience_str !== "") {
+    experience_str = experience_str.slice(0, -1);
+  }
+
+  return experience_str;
 }

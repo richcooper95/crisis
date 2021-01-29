@@ -281,6 +281,10 @@ export class CoachForm extends React.Component {
   getConfirmObject() {
     var form = {};
 
+    if (this.state.id) {
+      form.id = this.state.id;
+    }
+
     if (this.state.coachID) {
       form.coachID = this.state.coachID;
     }
@@ -293,8 +297,10 @@ export class CoachForm extends React.Component {
       form.bio = this.state.bio;
     }
 
-    if (this.state.available) {
-      form.available = this.state.available;
+    if (this.state.available === false) {
+      form.available = false;
+    } else if (this.state.available === true) {
+      form.available = true;
     }
 
     if (this.state.birth_year) {
@@ -324,6 +330,9 @@ export class CoachForm extends React.Component {
       console.log("Deducing housing entry for form");
       form.housing = this.state.housing.map((obj) => obj.type);
     }
+
+    console.log(JSON.stringify(form));
+    console.log(JSON.stringify(this.state));
 
     return form;
   }
@@ -361,7 +370,9 @@ export class CoachForm extends React.Component {
       confirmAlert({
         title: "Invalid Form",
         message:
-          "The data form is invalid or incomplete.\n\nPlease check the fields of the form again.",
+          "The data form is invalid or incomplete." +
+          `\n\nUnfilled elements: ${unfilledElements}.` +
+          `\n\nInvalid elements: ${invalidElements}.`,
         buttons: [
           {
             label: "Go back",
