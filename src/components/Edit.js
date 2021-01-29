@@ -100,6 +100,7 @@ export default class Edit extends React.Component {
    * @param coachFilter the coach filter
    */
   get_search_url(coachFilter) {
+    // XXX url hardcoded to localhost for development.
     var url = "http://localhost:8000/api/v1/coaches?";
 
     // simple_keys is the list of keys that do not need formatting.
@@ -135,6 +136,8 @@ export default class Edit extends React.Component {
   handleEditRequest(coachID) {
     // Set state to LOADING while getting coach details from server.
     // Set state to EDIT after receiving details.
+
+    // XXX url hardcoded to localhost for development.
     var url = `http://localhost:8000/api/v1/coaches/${coachID}`;
     this.setState({ display: displays.LOADING }, () => {
       fetch(url)
@@ -168,7 +171,7 @@ export default class Edit extends React.Component {
     console.log("Confirmed form: " + JSON.stringify(form_data));
     this.setState({ display: displays.LOADING });
 
-    // Hardcode to localhost:8000 for development mode.
+    // XXX url hardcoded to localhost for development.
     var url = `http://localhost:8000/api/v1/coaches/${form_data["id"]}`;
     fetch(url, {
       method: "POST",
@@ -187,6 +190,8 @@ export default class Edit extends React.Component {
    */
   handleDeleteConfirm(coachID) {
     console.log("Confirmed delete" + coachID);
+
+    // XXX url hardcoded to localhost for development.
     var url = `http://localhost:8000/api/v1/coaches/${coachID}`;
 
     // Set state to LOADING while getting coach details from server.
