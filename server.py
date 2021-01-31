@@ -66,7 +66,7 @@ class Coach(
         *,
         id: Optional[int] = None,
         name: str,
-        bio: Optional[] = None,
+        bio: Optional[str] = None,
         available: bool = True,
         birth_year: int,
         gender: str,
