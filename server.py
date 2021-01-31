@@ -66,7 +66,7 @@ class Coach(
         *,
         id: Optional[int] = None,
         name: str,
-        bio: Optional[str] = None,
+        bio: Optional[] = None,
         available: bool = True,
         birth_year: int,
         gender: str,
@@ -217,16 +217,16 @@ def _parse_languages(languages: str) -> Dict[str, int]:
     return ret
 
 
-def _parse_need(need: str) -> List[int]:
+def _parse_experience(experience: str) -> List[int]:
     """
     Return a string containing integers separated by commas as a list of ints.
     """
 
     ret = list()
-    if not need:
+    if not experience:
         return ret
-    for need_level in need.split(","):
-        ret.append(int(need_level))
+    for experience_level in experience.split(","):
+        ret.append(int(experience_level))
     return ret
 
 
@@ -242,10 +242,11 @@ def _get_coach_json(coach_args: JSON) -> CoachJSON:
             coach_args[int_arg] = int(coach_args[int_arg])
 
     # Turn all list of interger arguments into lists of ints
-    for list_int_arg in ["need", "rights", "housing"]:
-        if list_int_arg in coach_args:
-            # _parse_need() works for rights and housing also
-            coach_args[list_int_arg] = _parse_need(coach_args[list_int_arg])
+    for experience_args in ["need", "rights", "housing"]:
+        if experience_args in coach_args:
+            coach_args[experience_args] = _parse_experience(
+                coach_args[experience_args]
+            )
 
     # Special case languages as it's a dict.
     if "languages" in coach_args:
@@ -278,6 +279,8 @@ def _include_coach(coach: CoachJSON, coach_filter: CoachJSON) -> bool:
                 return False
 
     # Keys where we need coach[key] to be a superset of coach_filter[key]
+    #
+    # Note: this includes cases where the value is a list and is a dict.
     subset_comparison_keys = [
         "housing",
         "languages",
