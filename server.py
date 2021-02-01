@@ -294,7 +294,7 @@ def get_coaches(coach_filter: Optional[CoachJSON] = None) -> List[Coach]:
     return [
         coach
         for coach in coach_db
-        if _coach_matches_filter(coach, coach_filter)
+        if _include_coach(coach, coach_filter)
     ]
 
 
