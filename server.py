@@ -311,7 +311,7 @@ def _include_coach(coach: CoachJSON, coach_filter: CoachJSON) -> bool:
 # ------------------------------------------------------------------------------
 
 
-def get_coaches(coach_filter: CoachJSON) -> List[Coach]:
+def get_coaches(coach_filter: Optional[CoachJSON] = None) -> List[Coach]:
     """Return all coaches that match coach_filter."""
     return [
         coach
