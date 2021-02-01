@@ -247,14 +247,11 @@ def _get_coach_json(coach_args: JSON) -> CoachJSON:
     
 
 def _coach_matches_filter(coach: CoachJSON,
-                          coach_filter: Optional[CoachJSON]) -> bool:
+                          coach_filter: CoachJSON) -> bool:
     """
     Check whether to include a coach from the db in a repsoonse by filtering on
     if the coach matches the fields in coach_filter.
     """
-
-    if coach_filter is None:
-        return True
 
     # Check fields where the value is a:
     #
@@ -294,7 +291,7 @@ def get_coaches(coach_filter: Optional[CoachJSON] = None) -> List[Coach]:
     return [
         coach
         for coach in coach_db
-        if _coach_matches_filter(coach, coach_filter)
+        if coach_filter is None or _coach_matches_filter(coach, coach_filter)
     ]
 
 
