@@ -1,6 +1,6 @@
 import json
 import os
-from collections import namedtuple
+from collections import defaultdict, namedtuple
 from typing import Collection, Dict, List, Optional, Tuple, Union
 
 import flask as flask
@@ -211,7 +211,8 @@ def _parse_languages(languages: str) -> Dict[str, int]:
     ret = dict()
     if not languages:
         return ret
-    for lang in languages.split(","):
+
+    for lang in languages.rstrip(",").split(","):
         lang_name, proficiency = lang.split(":")
         ret[lang_name] = int(proficiency)
     return ret
@@ -219,15 +220,13 @@ def _parse_languages(languages: str) -> Dict[str, int]:
 
 def _parse_experience(experience: str) -> List[int]:
     """
-    Return a string containing integers separated by commas as a list of ints.
+    Convert a string representation of a list of integers to a proper list of
+    ints.
     """
 
-    ret = list()
     if not experience:
         return ret
-    for experience_level in experience.split(","):
-        ret.append(int(experience_level))
-    return ret
+    return [int(x) for x in experience.rstrip(",").split(",")]
 
 
 def _get_coach_json(coach_args: JSON) -> CoachJSON:
@@ -236,73 +235,53 @@ def _get_coach_json(coach_args: JSON) -> CoachJSON:
     request.
     """
 
-    # Turn all interger arguments into ints.
-    for int_arg in ["birth_year"]:
-        if int_arg in coach_args:
-            coach_args[int_arg] = int(coach_args[int_arg])
-
-    # Turn all list of interger arguments into lists of ints
-    for experience_args in ["need", "rights", "housing"]:
-        if experience_args in coach_args:
-            coach_args[experience_args] = _parse_experience(
-                coach_args[experience_args]
-            )
-
-    # Special case languages as it's a dict.
-    if "languages" in coach_args:
-        coach_args["languages"] = _parse_languages(coach_args["languages"])
+    field_conversion = defaultdict(
+        lambda: (lambda x: x),
+        birth_year=int,
+        need=_parse_experience,
+        rights=_parse_experience,
+        housing=_parse_experience,
+        languages=_parse_languages,
+    )
+    return {k: field_conversion[k](v) for k, v in coach_args.items()}
     
-    return coach_args
 
-
-def _include_coach(coach: CoachJSON, coach_filter: CoachJSON) -> bool:
+def _coach_matches_filter(coach: CoachJSON,
+                          coach_filter: Optional[CoachJSON]) -> bool:
     """
     Check whether to include a coach from the db in a repsoonse by filtering on
     if the coach matches the fields in coach_filter.
     """
 
-    if not coach_filter:
+    if coach_filter is None:
         return True
 
-    # Keys where we need coach[key] == coach_filter[key]
-    direct_comparison_keys = [
-        "available",
-        "bio",
-        "birth_year",
-        "gender",
-        "id",
-        "name",
-    ]
-    for key in direct_comparison_keys:
-        if key in coach_filter:
-            if not coach.get(key) == coach_filter[key]:
+    # Check fields where the value is a:
+    #
+    #   dict: by checking if all key:value pairs of coach_filter[key] are
+    #         elements of coach[key]
+    #
+    #   lists: by checking that every element of coach_filter[key] is an
+    #          element of coach[key], i.e. by ignoring ordering
+    #
+    #   all others: by direct comparison
+    for key, filter_val in coach_filter.items():
+
+        if isinstance(filter_val, dict):
+            if not all(item in coach.get(key).items()
+                       for item in filter_val.items()):
                 return False
 
-    # Keys where we need coach[key] to be a superset of coach_filter[key]
-    #
-    # Note: this includes cases where the value is a list and is a dict.
-    subset_comparison_keys = [
-        "housing",
-        "languages",
-        "need",
-        "rights",
-    ]
-    for key in subset_comparison_keys:
-        if key in coach_filter:
-            # If value is list, turn into sets for comparison.
-            if type(coach_filter[key]) is list:
-                if not set(coach_filter[key]) <= set(coach.get(key)):
-                    return False
+        elif isinstance(filter_val, list):
+            if not set(filter_val) <= set(coach.get(key)):
+                return False
 
-            # If value is dict, use all to check each key:value pair in
-            # coach_filter[key] is in coach[key].
-            elif type(coach_filter[key]) is dict:
-                if not all(
-                    item in coach.get(key).items()
-                    for item in coach_filter[key].items()
-                ):
-                    return False
-
+        else:
+            if coach.get(key) != filter_val:
+                return False
+    
+    # If reaching final statement, that implies all filters apply, and the
+    # coach should be included.
     return True
 
 
@@ -310,13 +289,12 @@ def _include_coach(coach: CoachJSON, coach_filter: CoachJSON) -> bool:
 # Route handlers
 # ------------------------------------------------------------------------------
 
-
-def get_coaches(coach_filter: CoachJSON) -> List[Coach]:
+def get_coaches(coach_filter: Optional[CoachJSON] = None) -> List[Coach]:
     """Return all coaches that match coach_filter."""
     return [
         coach
         for coach in coach_db
-        if _include_coach(coach, coach_filter) == True
+        if _coach_matches_filter(coach, coach_filter)
     ]
 
 
@@ -377,7 +355,7 @@ def get_coach_matches(data: CoachJSON) -> List[Tuple[int, Coach]]:
         return max((0, *[30 - 2 * languages[L] * c.languages[L] for L in match_langs]))
 
     coach_matches = []
-    for coach in get_coaches(None):
+    for coach in get_coaches():
         if not coach.available:
             continue
         match_score = 0
