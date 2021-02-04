@@ -7,6 +7,7 @@
         "s3_bucket": "zappa-fogxyjqdt",
         "aws_region": "eu-west-2",
         "keep_warm": false,
+        "cors": true,
         "exclude": [
             "node_modules"
         ],
