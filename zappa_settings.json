@@ -4,7 +4,7 @@
         "profile_name": "crisis-deploy",
         "project_name": "crisis",
         "runtime": "python3.8",
-        "s3_bucket": "zappa-yzf0edbqq",
+        "s3_bucket": "zappa-fogxyjqdt",
         "aws_region": "eu-west-2",
         "keep_warm": false,
         "exclude": [

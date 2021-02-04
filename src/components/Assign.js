@@ -5,6 +5,7 @@ import Loader from 'react-loader-spinner';
 import Table from 'react-bootstrap/Table';
 import "react-loader-spinner/dist/loader/css/react-spinner-loader.css"
 //import 'react-confirm-alert/src/react-confirm-alert.css';
+import { Auth } from 'aws-amplify';
 
 // @@@ Used in testing
 //const dummyResults = [{"id":0,"name":"Bob","bio":"Hey, Bob here.","available":true,"birth_year":1992,"gender":"male","languages":{"english":1,"spanish":4},"need":[1,2,3],"rights":[2],"housing":[3],"match_score":35},{"id":4,"name":"Mike","bio":"","available":true,"birth_year":1970,"gender":"male","languages":{"spanish":1,"french":2},"need":[1,2,3],"rights":[2],"housing":[3],"match_score":5},{"id":1,"name":"Albert","bio":"","available":true,"birth_year":1990,"gender":"other","languages":{},"need":[1,2,3],"rights":[2],"housing":[3],"match_score":5},{"id":2,"name":"Kelly S.","bio":"","available":true,"birth_year":1988,"gender":"female","languages":{},"need":[1,2,3],"rights":[2],"housing":[3],"match_score":4}]
@@ -41,7 +42,11 @@ export default class Assign extends React.Component {
       console.log(url);
       // TODO: Decide whether to keep this sleep (currently so I can see the loading wheel)
       //this.sleep(2000).then(() => {
-        fetch(url)
+      // TODO: Provide a wrapped version of fetch() that uses the AWS token.
+        Auth.currentSession()
+        .then(session => fetch(url, {
+          headers: {Authorization: session.idToken.jwtToken}
+        }))
         .then(response => response.json())
         .then(data => this.setState({
           results: data,
@@ -253,7 +258,7 @@ class AssignForm extends React.Component {
     if (process.env.NODE_ENV !== "production") {
       url_base = "http://localhost:8000/";
     } else {
-      url_base = "https://6zn597dwdd.execute-api.eu-west-2.amazonaws.com/dev/";
+      url_base = "https://juw492hzej.execute-api.eu-west-2.amazonaws.com/dev/";
     }
     var url_fmt = url_base + "api/v1/coach-matches?birth_year={0}&gender={1}&languages={2}&need={3}&rights={4}&housing={5}";
 

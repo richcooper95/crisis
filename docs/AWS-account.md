@@ -10,6 +10,8 @@ This page describes how to setup an AWS account and perform the initial deployme
 
 [Cognito](#Cognito)
 
+[Lambda](#Lambda)
+
 ## IAM
 
 Within the Identity & Access Management (IAM) section of the AWS Management Console, create a programmatic-access user named `crisis-deploy` within a group named `zappa` that contains the following inline policy.
@@ -27,7 +29,7 @@ Within the Identity & Access Management (IAM) section of the AWS Management Cons
         "iam:PutRolePolicy"
       ],
       "Resource": [
-        "arn:aws:iam:::role/*-ZappaLambdaExecutionRole"
+        "arn:aws:iam::*:role/*-ZappaLambdaExecutionRole"
       ]
     },
     {
@@ -125,7 +127,7 @@ aws_secret_access_key=...
 
 ## Amplify
 
-The AWS Amplify is used to deploy the frontend code.
+AWS Amplify is used to deploy the frontend code.
 
 1. Install the AWS Amplify CLI using `sudo npm install -g @aws-amplify/cli`.
 1. Run `amplify configure` and follow the steps to create an IAM user for use by the CLI. Specify a profile name of `amplify` rather than accepting the default.
@@ -141,3 +143,7 @@ After ensuring that `amplify/team-provider-info.json` is still present in `.giti
 ## Cognito
 
 Within the Cognito User Pools section of the AWS Management Console, open the user pool created by the Amplify CLI and change the 'User sign-ups allowed' propery to 'Only allow administrators to create users'. Then create at least one user (eg named 'dev').
+
+## Lambda
+
+Zappa is used to deploy our Python server code into AWS Lambda. Run `zappa deploy dev` to deploy the development instance.
