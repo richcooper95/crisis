@@ -42,20 +42,31 @@ export default class Assign extends React.Component {
       console.log(url);
       // TODO: Decide whether to keep this sleep (currently so I can see the loading wheel)
       //this.sleep(2000).then(() => {
-      // TODO: Provide a wrapped version of fetch() that uses the AWS token.
-        Auth.currentSession()
-        .then(session => fetch(url, {
-          headers: {Authorization: session.idToken.jwtToken}
-        }))
-        .then(response => response.json())
-        .then(data => this.setState({
-          results: data,
-          display: displays.RESULTS,
-        }))
-        .catch(error => this.setState({ // TODO: better error handling here?
-          error: error,
-          display: displays.FORM
-        }))
+      // TODO: Pull all the below out to a common function
+      var promise;
+      if (process.env.NODE_ENV === "production") {
+        promise = Auth.currentSession();
+      } else {
+        // In development mode, return an object that looks sufficiently like
+        // the AWS auth session object. The actual value of the auth token
+        // doesn't matter: the development server won't use it.
+        promise = new Promise(function(resolve, reject) {
+          resolve({"idToken": {"jwtToken": "dummy auth token"}});
+        })
+      }
+
+      promise.then(session => fetch(url, {
+        headers: {Authorization: session.idToken.jwtToken}
+      })
+      .then(response => response.json())
+      .then(data => this.setState({
+        results: data,
+        display: displays.RESULTS,
+      }))
+      .catch(error => this.setState({ // TODO: better error handling here?
+        error: error,
+        display: displays.FORM
+      })),)
       //})
     //})
   }

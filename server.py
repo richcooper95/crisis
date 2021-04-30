@@ -294,8 +294,9 @@ def allow_cors(route_handler):
         # TODO: Replace with the final expected origins, one for each frontend
         # branch that we expect to deploy into AWS. Probably want these defined
         # in a metadata file, rather than here in the server code.
-        response.headers["Access-Control-Allow-Origin"] = \
-            "https://aws-amplify.d1nt2xg69cmmwk.amplifyapp.com"
+        if os.environ.get("FLASK_ENV") != "development":
+            response.headers["Access-Control-Allow-Origin"] = \
+                "https://aws-amplify.d1nt2xg69cmmwk.amplifyapp.com"
         return response
     return wrapper
 
