@@ -54,10 +54,9 @@ export default class App extends React.Component {
     if (process.env.NODE_ENV === "production") {
       app =
         <AmplifyAuthenticator>
-          { process.env.NODE_ENV === "production" &&
-            <AmplifySignIn slot="sign-in" hideSignUp={true} /> }
+          <AmplifySignIn slot="sign-in" hideSignUp={true} />
           {app}
-          { process.env.NODE_ENV === "production" && <AmplifySignOut/> }
+          <AmplifySignOut/>
         </AmplifyAuthenticator>;
     }
 
