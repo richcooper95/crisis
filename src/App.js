@@ -1,5 +1,5 @@
 import React from 'react';
-import {AmplifySignIn, AmplifySignOut, withAuthenticator} from '@aws-amplify/ui-react';
+import {AmplifyAuthenticator, AmplifySignIn, AmplifySignOut} from '@aws-amplify/ui-react';
 import './index.css';
 import Sidebar from './components/Sidebar';
 import Arena from './components/Arena';
@@ -22,10 +22,9 @@ export default class App extends React.Component {
   }
 
   render() {
-    const app =
-      <div>
-        { process.env.NODE_ENV === "production" &&
-          <AmplifySignIn slot="sign-in" hideSignUp={true} /> }
+    return (
+      <AmplifyAuthenticator>
+        <AmplifySignIn slot="sign-in" hideSignUp={true} />
         <div className="app">
           <Sidebar
             onSidebarSelect={s => this.handleSidebarSelect(s)}
@@ -52,12 +51,8 @@ export default class App extends React.Component {
           </div>
           <Arena sidebarSelect={this.state.sidebarSelect}/>
         </div>
-        { process.env.NODE_ENV === "production" && <AmplifySignOut /> }
-      </div>
-    ;
-
-    return(
-      process.env.NODE_ENV === "production" ? withAuthenticator(app) : app
+        <AmplifySignOut/>
+      </AmplifyAuthenticator>
     )
   }
 }
