@@ -22,7 +22,7 @@ export default class App extends React.Component {
   }
 
   render() {
-    const app =
+    var app =
       <div className="app">
         <Sidebar
           onSidebarSelect={s => this.handleSidebarSelect(s)}
