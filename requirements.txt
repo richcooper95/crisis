@@ -5,10 +5,12 @@ certifi==2020.12.5
 cfn-flip==1.2.3
 chardet==4.0.0
 click==7.1.2
+diagrams-0.19.1
 durationpy==0.5
 Flask==1.1.2
 Flask-Cors==3.0.9
 future==0.18.2
+graphviz-0.16
 hjson==3.0.2
 idna==2.10
 itsdangerous==1.1.0

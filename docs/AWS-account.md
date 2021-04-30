@@ -1,6 +1,6 @@
 # AWS Account Setup
 
-This page describes how to setup an AWS account and perform the initial deployment of a new instance of the app.
+This page captures how an AWS account was set up and how the initial deployment the app was performed.
 
 ## Contents
 
