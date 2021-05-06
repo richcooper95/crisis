@@ -1,7 +1,7 @@
 .arena {
   background: #fff;
   padding: 25px;
-  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+  font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS", sans-serif;
   line-height: 1.5em;
   margin-top: 72px;
 }
@@ -26,7 +26,7 @@
 body {
   margin: 0;
   padding: 0;
-  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+  font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS", sans-serif;
 }
 
 .app {
@@ -73,9 +73,9 @@ h1 {
 }
 
 .name-input {
-	border:1px solid #c9c9c9;
-	border-radius:4px;
-	height: 14px;
+  border: 1px solid #c9c9c9;
+  border-radius: 4px;
+  height: 14px;
   width: 446px;
   padding: 10px;
 }
@@ -120,7 +120,7 @@ body.react-confirm-alert-body-element {
 }
 
 .react-confirm-alert-body {
-  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+  font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS", sans-serif;
   width: 400px;
   padding: 30px;
   text-align: left;
@@ -206,12 +206,16 @@ body.react-confirm-alert-body-element {
   }
 }
 
-.assign-form-left {
+.assign-form-left,
+.add-form-left,
+.edit-form-left {
   width: 450px;
   height: 460px;
 }
 
-.assign-form-right, .add-form-right {
+.assign-form-right,
+.add-form-right,
+.edit-form-right {
   margin-left: 450px;
   margin-top: -508px;
   padding-left: 50px;
@@ -219,8 +223,10 @@ body.react-confirm-alert-body-element {
   height: 500px;
 }
 
-.add-form-right {
+.add-form-right,
+.edit-form-right {
   margin-top: -480px;
+  display: inline-block;
 }
 
 .proficiency-choice {
@@ -232,24 +238,39 @@ body.react-confirm-alert-body-element {
   width: 190px;
 }
 
-.assign-form-submit button, .add-form-submit button {
+.assign-form-submit button,
+.add-form-submit button,
+.edit-form-submit button,
+.edit-form-cancel button,
+.search-table-cancel button,
+.search-table-edit button,
+.search-table-delete button {
   outline: none;
   background: rgba(236, 34, 41, 0.934);
   border: none;
   display: inline-block;
   padding: 6px 18px;
   color: #fff;
-  margin-left: 500px;
   margin-right: 10px;
   border-radius: 5px;
   font-size: 12px;
   cursor: pointer;
 }
 
-.add-form-submit button {
-  margin-top: 150px;
-
+.assign-form-submit button,
+.add-form-submit button,
+.edit-form-submit button,
+.edit-form-cancel button {
+  margin-left: 500px;
 }
+
+.add-form-submit button,
+.edit-form-submit button,
+.edit-form-cancel button,
+.search-table-cancel button {
+  margin-top: 20px;
+}
+
 
 textarea {
   width: 450px;

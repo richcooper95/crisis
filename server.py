@@ -1,6 +1,6 @@
 import json
 import os
-from collections import namedtuple
+from collections import defaultdict, namedtuple
 from typing import Collection, Dict, List, Optional, Tuple, Union
 
 import flask as flask
@@ -66,7 +66,7 @@ class Coach(
         *,
         id: Optional[int] = None,
         name: str,
-        bio: str,
+        bio: Optional[str] = None,
         available: bool = True,
         birth_year: int,
         gender: str,
@@ -99,6 +99,9 @@ class Coach(
 
     def copy(self) -> "Coach":
         return self.from_json(self.to_json())
+
+    def get(self, key) -> JSON:
+        return getattr(self, key)
 
 
 class CoachDB:
@@ -208,19 +211,88 @@ def _parse_languages(languages: str) -> Dict[str, int]:
     ret = dict()
     if not languages:
         return ret
-    for lang in languages.split(","):
+
+    for lang in languages.rstrip(",").split(","):
         lang_name, proficiency = lang.split(":")
         ret[lang_name] = int(proficiency)
     return ret
+
+
+def _parse_experience(experience: str) -> List[int]:
+    """
+    Convert a string representation of a list of integers to a proper list of
+    ints.
+    """
+
+    if not experience:
+        return list()
+    return [int(x) for x in experience.rstrip(",").split(",")]
+
+
+def _get_coach_json(coach_args: JSON) -> CoachJSON:
+    """
+    Return a CoachJSON object corresponding the args from the get coaches
+    request.
+    """
+
+    field_conversion = defaultdict(
+        lambda: (lambda x: x),
+        birth_year=int,
+        need=_parse_experience,
+        rights=_parse_experience,
+        housing=_parse_experience,
+        languages=_parse_languages,
+    )
+    return {k: field_conversion[k](v) for k, v in coach_args.items()}
+    
+
+def _coach_matches_filter(coach: CoachJSON,
+                          coach_filter: CoachJSON) -> bool:
+    """
+    Check whether to include a coach from the db in a repsoonse by filtering on
+    if the coach matches the fields in coach_filter.
+    """
+
+    # Check fields where the value is a:
+    #
+    #   dict: by checking if all key:value pairs of coach_filter[key] are
+    #         elements of coach[key]
+    #
+    #   lists: by checking that every element of coach_filter[key] is an
+    #          element of coach[key], i.e. by ignoring ordering
+    #
+    #   all others: by direct comparison
+    for key, filter_val in coach_filter.items():
+
+        if isinstance(filter_val, dict):
+            if not all(item in coach.get(key).items()
+                       for item in filter_val.items()):
+                return False
+
+        elif isinstance(filter_val, list):
+            if not set(filter_val) <= set(coach.get(key)):
+                return False
+
+        else:
+            if coach.get(key) != filter_val:
+                return False
+    
+    # If reaching final statement, that implies all filters apply, and the
+    # coach should be included.
+    return True
 
 
 # ------------------------------------------------------------------------------
 # Route handlers
 # ------------------------------------------------------------------------------
 
-
-def get_coaches() -> List[Coach]:
-    return list(coach_db)
+def get_coaches(coach_filter: Optional[CoachJSON] = None) -> List[Coach]:
+    """Return all coaches that match coach_filter."""
+    return [
+        coach
+        for coach in coach_db
+        if not coach_filter or _coach_matches_filter(coach, coach_filter)
+    ]
 
 
 def get_coach(coach_id: int) -> Coach:
@@ -315,7 +387,9 @@ def api_coaches() -> FlaskReturn:
     """HTTP API for 'coaches'."""
     try:
         if flask.request.method == "GET":
-            coaches = get_coaches()
+            args = dict(**flask.request.args)
+            coach_filter = _get_coach_json(args)
+            coaches = get_coaches(coach_filter)
             response = flask.jsonify([c.to_json() for c in coaches])
         elif flask.request.method == "POST":
             coach = create_coach(flask.request.json)

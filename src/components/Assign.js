@@ -36,7 +36,6 @@ export default class Assign extends React.Component {
     console.log("Confirmed form: " + JSON.stringify(form_data));
     // TODO: Generate URL with params (make sure to use a proper API
     //       so that spaces etc. are properly handled!).
-    // TODO: Hardcode to localhost:8000 for development mode.
     this.setState({ display: displays.LOADING }, () => {
       // TODO: Decide whether to keep this sleep (currently so I can see the loading wheel)
       this.sleep(2000).then(() => {fetch(url)
@@ -245,23 +244,14 @@ class AssignForm extends React.Component {
     return s;
   }
 
-  getLanguagesForUrl() {
-    var languages_str = "";
-
-    Object.entries(this.state.languages).forEach((entry) => {
-      languages_str += this.format("{0}:{1},", entry[0], entry[1]);
-    })
-
-    return languages_str.slice(0, -1);
-  }
-
   getCoachMatchUrl() {
+    // XXX url hardcoded to localhost for development.
     var url_fmt = "http://localhost:8000/api/v1/coach-matches?birth_year={0}&gender={1}&languages={2}&need={3}&rights={4}&housing={5}";
 
     var url = this.format(url_fmt,
                           this.state.year,
                           this.state.gender,
-                          this.getLanguagesForUrl(),
+                          cmn.getLanguagesForUrl(this.state.languages),
                           this.state.need,
                           this.state.rights,
                           this.state.housing);
