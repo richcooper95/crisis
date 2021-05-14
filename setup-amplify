@@ -1,0 +1,39 @@
+#!/bin/bash
+
+# Taken from https://docs.amplify.aws/cli/usage/headless#sample-script-3
+
+set -e
+IFS='|'
+
+REACTCONFIG="{\
+\"SourceDir\":\"src\",\
+\"DistributionDir\":\"build\",\
+\"BuildCommand\":\"yarn build\",\
+\"StartCommand\":\"yarn start\"\
+}"
+AWSCLOUDFORMATIONCONFIG="{\
+\"configLevel\":\"project\",\
+\"useProfile\":true,\
+\"profileName\":\"amplify\",\
+\"region\":\"eu-west-2\"\
+}"
+AMPLIFY="{\
+\"projectName\":\"crisis\",\
+\"appId\":\"d1nt2xg69cmmwk\",\
+\"envName\":\"dev\",\
+\"defaultEditor\":\"vscode\"\
+}"
+FRONTEND="{\
+\"frontend\":\"javascript\",\
+\"framework\":\"react\",\
+\"config\":$REACTCONFIG\
+}"
+PROVIDERS="{\
+\"awscloudformation\":$AWSCLOUDFORMATIONCONFIG\
+}"
+
+amplify pull \
+--amplify $AMPLIFY \
+--frontend $FRONTEND \
+--providers $PROVIDERS \
+--yes
