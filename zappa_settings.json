@@ -4,11 +4,18 @@
         "profile_name": "crisis-deploy",
         "project_name": "crisis",
         "runtime": "python3.8",
-        "s3_bucket": "zappa-yzf0edbqq",
+        "s3_bucket": "zappa-fogxyjqdt",
         "aws_region": "eu-west-2",
         "keep_warm": false,
+        "cors": true,
         "exclude": [
             "node_modules"
-        ]
+        ],
+        "authorizer": {
+            "type": "COGNITO_USER_POOLS",
+            "provider_arns": [
+                "arn:aws:cognito-idp:eu-west-2:233928554688:userpool/eu-west-2_G4pBFSApd"
+            ]
+        }
     }
 }

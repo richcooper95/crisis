@@ -4,36 +4,36 @@ This page contains documentation aimed at developers contributing to the project
 
 ## Contents
 
-[Hosting](#hosting)
-
 [App Design](#app-design)
 
 [Front End](#front-end)
 
-[Server](#server)
+[Back End](#back-end)
 
 [Database](#database)
 
 [Security](#security)
 
-## Hosting
-
-### AWS
-
-The plan is to use AWS Lambda, details to come.
-
 ## App Design
 
-The high level design is as follows:
+The architecture of the app is shown in the following diagram.
 
-1. [Front End](#front-end): A React.js front end which allows the user to interact with the database and assign a Coach to a new Member.
+![architecture](assets/architecture.png)
+
+1. [Front End](#front-end): A React.js front end which allows the user to view and edit coach information and assign a coach to a new member.
     1. This consists of a single-page application with a sidebar and an 'arena' that changes depending on which sidebar option is selected, and the current state.
-1. [Server](#server): A Python `flask` server.
-    1. This serves the web app, and also accepts requests from the web app to e.g. add a Coach to the database.
-    1. More details can be found in the [HTTP API](#http-api) section.
-1. [Database](#database): A JSON database.
-    1. This is a JSON file `/var/lib/coach-db.json` stored server-side which contains all of the Coach data.
-    1. This is backed up by a twice-daily cronjob to `/var/lib/backups/coach-db.json.bak`.
+    1. It is hosted in AWS Amplify, which clones and builds the GitHub repository whenever a monitored branch is updated.
+1. [Back End](#back-end): A Python server.
+    1. This accepts requests from the front end to e.g. add a Coach to the database.
+    1. It is hosted in AWS Lambda, though is written to use the [Flask](https://palletsprojects.com/p/flask/) webserver framework, so that development instances can be easily run locally. [Zappa](https://github.com/zappa/Zappa) is used to deploy the Flask app into Lambda.
+    1. More details of the HTTP API can be found in [this section](#http-api).
+1. [Database](#database): A database of coaches.
+    1. This is used by the back end code when servicing requests from the front end.
+    1. It is hosted in AWS Dynamo.
+1. Authentication:
+    1. Both the front and back ends are accesible only to authenticated users.
+    1. The authentication mechanisms and the user database are provided by AWS Cognito.
+
 
 ## Front End
 
@@ -58,6 +58,8 @@ The server is implemented via the `flask` Python library. This was chosen since 
 ### HTTP API
 
 ## Database
+
+> To be updated once the Database is migrated to AWS Dynamo...
 
 The database was chosen to be a JSON file. The following considerations were taken into account:
 

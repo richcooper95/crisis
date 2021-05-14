@@ -1,0 +1,35 @@
+#! /usr/bin/env python3
+
+from diagrams import Diagram, Cluster, Edge
+from diagrams.generic.device import Tablet
+from diagrams.aws.mobile import Amplify
+from diagrams.aws.security import Cognito
+from diagrams.aws.compute import Lambda
+from diagrams.aws.database import Dynamodb
+from diagrams.programming.framework import React
+from diagrams.programming.language import Python
+
+FILENAME="docs/assets/architecture"
+
+with Diagram("Crisis Coach Assignment Tool", filename=FILENAME, show=False):
+    user = Tablet("Crisis staff")
+
+    with Cluster("GitHub"):
+        js     = React("JS/React code")
+        python = Python("Server code")
+
+    with Cluster("Amazon Web Services"):
+        frontend = Amplify("Frontend app")
+        auth     = Cognito("User auth")
+        backend  = Lambda("Backend app")
+        db       = Dynamodb("Coach DB")
+
+    user >> frontend
+
+    js >> frontend
+    python >> backend
+
+    frontend >> [auth, backend]
+    backend >> [auth, db]
+
+print("Diagram written to ./{}.png".format(FILENAME))
