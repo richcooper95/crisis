@@ -1,5 +1,5 @@
 {
-    "dev": {
+    "production": {
         "app_function": "server.app",
         "profile_name": "crisis-deploy",
         "project_name": "crisis",
