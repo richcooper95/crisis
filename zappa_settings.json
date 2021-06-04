@@ -16,6 +16,9 @@
             "provider_arns": [
                 "arn:aws:cognito-idp:eu-west-2:233928554688:userpool/eu-west-2_G4pBFSApd"
             ]
+        },
+        "environment_variables": {
+            "ALLOWED_ORIGINS": "https://sandbox.d1nt2xg69cmmwk.amplifyapp.com/,https://master.d1nt2xg69cmmwk.amplifyapp.com/"
         }
     }
 }
