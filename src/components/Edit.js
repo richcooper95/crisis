@@ -100,8 +100,7 @@ export default class Edit extends React.Component {
    * @param coachFilter the coach filter
    */
   get_search_url(coachFilter) {
-    // XXX url hardcoded to localhost for development.
-    var url = "http://localhost:8000/api/v1/coaches?";
+    var url = cmn.getApiUrlBase() + "coaches?";
 
     // simple_keys is the list of keys that do not need formatting.
     var simple_keys = ["available", "birth_year", "gender", "name"];
@@ -137,8 +136,7 @@ export default class Edit extends React.Component {
     // Set state to LOADING while getting coach details from server.
     // Set state to EDIT after receiving details.
 
-    // XXX url hardcoded to localhost for development.
-    var url = `http://localhost:8000/api/v1/coaches/${coachID}`;
+    var url = cmn.getApiUrlBase() + `coaches/${coachID}`;
     this.setState({ display: displays.LOADING }, () => {
       fetch(url)
         .then((response) => response.json())
@@ -171,8 +169,7 @@ export default class Edit extends React.Component {
     console.log("Confirmed form: " + JSON.stringify(form_data));
     this.setState({ display: displays.LOADING });
 
-    // XXX url hardcoded to localhost for development.
-    var url = `http://localhost:8000/api/v1/coaches/${form_data["id"]}`;
+    var url = cmn.getApiUrlBase() + `coaches/${form_data["id"]}`;
     fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -191,8 +188,7 @@ export default class Edit extends React.Component {
   handleDeleteConfirm(coachID) {
     console.log("Confirmed delete" + coachID);
 
-    // XXX url hardcoded to localhost for development.
-    var url = `http://localhost:8000/api/v1/coaches/${coachID}`;
+    var url = cmn.getApiUrlBase() + `coaches/${coachID}`;
 
     // Set state to LOADING while getting coach details from server.
     // Set state to TABLE after receiving details.
