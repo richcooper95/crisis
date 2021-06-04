@@ -18,7 +18,7 @@
             ]
         },
         "environment_variables": {
-            "ALLOWED_ORIGINS": "https://sandbox.d1nt2xg69cmmwk.amplifyapp.com/,https://master.d1nt2xg69cmmwk.amplifyapp.com/"
+            "ALLOWED_ORIGINS": "https://sandbox.d1nt2xg69cmmwk.amplifyapp.com,https://master.d1nt2xg69cmmwk.amplifyapp.com"
         }
     }
 }
