@@ -22,8 +22,7 @@ export default class Add extends React.Component {
     console.log("Confirmed form: " + JSON.stringify(form_data));
     this.setState({ display: displays.LOADING });
 
-    // Hardcode to localhost:8000 for development mode.
-    fetch("http://localhost:8000/api/v1/coaches", {
+    fetch(cmn.getApiUrlBase() + "coaches", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(form_data),

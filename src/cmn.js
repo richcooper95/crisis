@@ -105,3 +105,10 @@ export function getExperienceForUrl(experience) {
 
   return experience_str;
 }
+
+/**
+ * Return a string containing the base URL of the API.
+ */
+export function getApiUrlBase() {
+  return process.env.REACT_APP_BACKEND_URL + "api/v1/";
+}

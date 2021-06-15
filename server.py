@@ -7,6 +7,9 @@ from typing import Collection, Dict, List, Optional, Tuple, Union
 import flask as flask
 
 
+LOCALHOST_ORIGIN = "http://localhost:3000"
+
+
 # ------------------------------------------------------------------------------
 # Flask app
 # ------------------------------------------------------------------------------
@@ -18,7 +21,7 @@ logger = app.logger
 if os.environ.get("FLASK_ENV") == "development":
     import flask_cors
 
-    flask_cors.CORS(app, origins=["http://localhost:3000"])
+    flask_cors.CORS(app, origins=[LOCALHOST_ORIGIN])
 
 
 # ------------------------------------------------------------------------------
@@ -291,12 +294,17 @@ def allow_cors(route_handler):
     def wrapper(*args, **kwargs):
         response = route_handler(*args, **kwargs)
         response = flask.make_response(response)
-        # TODO: Replace with the final expected origins, one for each frontend
-        # branch that we expect to deploy into AWS. Probably want these defined
-        # in a metadata file, rather than here in the server code.
+
+        allowed_origins = os.environ.get("ALLOWED_ORIGINS",
+                                         LOCALHOST_ORIGIN).split(',')
+
         if os.environ.get("FLASK_ENV") != "development":
-            response.headers["Access-Control-Allow-Origin"] = \
-                "https://aws-amplify.d1nt2xg69cmmwk.amplifyapp.com"
+            if (flask.request.headers["Origin"] in allowed_origins):
+                allowed_origin = flask.request.headers["Origin"]
+            else:
+                allowed_origin = allowed_origins[0]
+            response.headers["Access-Control-Allow-Origin"] = allowed_origin
+
         return response
     return wrapper
 
@@ -446,7 +454,7 @@ def api_coaches_id(coach_id: int) -> FlaskReturn:
     return response
 
 
-@app.route("/api/v1/coach-matches", methods=["GET"])
+@app.route("/api/v1/coach-matches", methods=["GET", "OPTIONS"])
 @allow_cors
 def api_coach_matches() -> FlaskReturn:
     """HTTP API for 'coach-matches'."""
