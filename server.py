@@ -1,6 +1,7 @@
 import json
 import os
 import functools
+import logging
 from collections import defaultdict, namedtuple
 from typing import Collection, Dict, List, Optional, Tuple, Union
 
@@ -16,6 +17,7 @@ LOCALHOST_ORIGIN = "http://localhost:3000"
 
 app = flask.Flask("crisis", static_folder="build/", static_url_path="/")
 logger = app.logger
+#logger.setLevel(logging.DEBUG)
 
 # In development mode, allow access from the Yarn-hosted frontend.
 if os.environ.get("FLASK_ENV") == "development":
@@ -301,8 +303,11 @@ def allow_cors(route_handler):
         if os.environ.get("FLASK_ENV") != "development":
             if (flask.request.headers["Origin"] in allowed_origins):
                 allowed_origin = flask.request.headers["Origin"]
+                logger.debug(f"Origin {allowed_origin} is allowed")
             else:
                 allowed_origin = allowed_origins[0]
+                logger.debug(f"Origin {flask.request.headers['Origin']} is "
+                              "not allowed")
             response.headers["Access-Control-Allow-Origin"] = allowed_origin
 
         return response
